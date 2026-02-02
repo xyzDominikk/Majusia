@@ -56,16 +56,19 @@ button {
 
 .heart {
   position: fixed;
-  color: #ff4d6d;
   font-size: 24px;
   animation: floatUp 4s linear forwards;
+  pointer-events: none;
+  will-change: transform;
 }
 
 .confetti {
   position: fixed;
   width: 10px;
   height: 10px;
-  animation: fall 3s linear forwards;
+  animation: fall 3.2s linear forwards;
+  pointer-events: none;
+  will-change: transform;
 }
 
 @keyframes floatUp {
@@ -74,7 +77,7 @@ button {
 }
 
 @keyframes fall {
-  from { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  from { transform: translateY(0) rotate(0deg); opacity: 1; }
   to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
 }
 </style>
@@ -82,26 +85,28 @@ button {
 
 <body>
 
-<div class="card">
+<div class="card" id="card">
   <h1>Czy zostaniesz moją walentynką? 💘</h1>
   <button id="yes">Tak 💖</button>
   <button id="no">Nie 💔</button>
-  <div class="counter">Próby kliknięcia „Nie”: <span id="count">0</span></div>
+  <div class="counter">
+    Próby kliknięcia „Nie”: <span id="count">0</span>
+  </div>
 </div>
 
-<audio id="sound">
+<audio id="sound" preload="auto">
   <source src="https://www.soundjay.com/buttons/sounds/button-09.mp3">
 </audio>
 
 <script>
-// FULLSCREEN
+// ========= FULLSCREEN (iOS SAFE) =========
 document.body.addEventListener('click', () => {
-  if (document.documentElement.requestFullscreen) {
-    document.documentElement.requestFullscreen().catch(()=>{});
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen?.().catch(()=>{});
   }
-}, { once: true });
+});
 
-// UCIEKANIE + LICZNIK
+// ========= UCIEKAJĄCY "NIE" =========
 const noBtn = document.getElementById('no');
 let tries = 0;
 
@@ -111,6 +116,7 @@ function moveNoButton() {
 
   const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
   const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+
   noBtn.style.left = x + 'px';
   noBtn.style.top = y + 'px';
 }
@@ -118,44 +124,61 @@ function moveNoButton() {
 noBtn.addEventListener('mouseover', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
-// SERDUSZKA
+// ========= SERDUSZKA (iOS SAFE) =========
 function createHeart() {
   const heart = document.createElement('div');
   heart.className = 'heart';
-  heart.innerHTML = '💖';
-  heart.style.left = Math.random() * 100 + 'vw';
-  heart.style.bottom = '0';
+  heart.textContent = '💖';
+  heart.style.left = Math.random() * window.innerWidth + 'px';
+  heart.style.bottom = '0px';
   heart.style.fontSize = (20 + Math.random() * 20) + 'px';
+
   document.body.appendChild(heart);
   setTimeout(() => heart.remove(), 4000);
 }
-setInterval(createHeart, 300);
 
-// CONFETTI
+let heartInterval = setInterval(createHeart, 350);
+
+// ========= CONFETTI (iOS SAFE) =========
 function launchConfetti() {
+  const width = window.innerWidth;
+
   for (let i = 0; i < 120; i++) {
     const c = document.createElement('div');
     c.className = 'confetti';
-    c.style.left = Math.random() * 100 + 'vw';
-    c.style.background = `hsl(${Math.random()*360},100%,50%)`;
-    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    c.style.left = Math.random() * width + 'px';
+    c.style.top = '-20px';
+    c.style.backgroundColor =
+      `hsl(${Math.random() * 360},100%,50%)`;
+
     document.body.appendChild(c);
-    setTimeout(() => c.remove(), 4000);
+    setTimeout(() => c.remove(), 3500);
   }
 }
 
-// TAK
+// ========= CLICK "TAK" =========
 document.getElementById('yes').addEventListener('click', () => {
-  document.getElementById('sound').play();
+
+  // audio – tylko po kliknięciu (iOS requirement)
+  const sound = document.getElementById('sound');
+  sound.currentTime = 0;
+  sound.play().catch(()=>{});
+
+  clearInterval(heartInterval);
   launchConfetti();
-  document.body.innerHTML = `
-    <h1 style="color:white;text-align:center;">
-      🎉💖 YAAAAY 💖🎉<br><br>
+
+  // NIE używamy innerHTML (iOS bug)
+  const card = document.getElementById('card');
+  card.innerHTML = `
+    <h1 style="color:#ff4d6d;">
+      🎉💖 YAAAAY 💖🎉
+    </h1>
+    <p style="font-size:22px;">
       Wiedziałem 😍
-    </h1>`;
+    </p>
+  `;
 });
 </script>
 
 </body>
 </html>
-
