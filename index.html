@@ -178,13 +178,6 @@ document.getElementById('yes').addEventListener('click', async () => {
     scale: window.devicePixelRatio
   });
 
-  // watermark
-  const ctx = canvas.getContext('2d');
-  ctx.font = 'bold 50px Arial';
-  ctx.fillStyle = 'rgba(255,0,0,0.7)';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText('POWIEDZIAŁA TAK 💖', canvas.width / 2, canvas.height / 2);
 
   canvas.toBlob(blob => {
     const file = new File([blob], 'walentynka.png', { type: 'image/png' });
