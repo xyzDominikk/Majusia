@@ -66,6 +66,7 @@ button {
   border: none;
   border-radius: 14px;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 #yes { background: #4CAF50; color: white; }
@@ -87,8 +88,14 @@ button {
 }
 
 @keyframes float {
-  from { transform: translateY(0); opacity: 1; }
-  to   { transform: translateY(-120vh); opacity: 0; }
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-120vh) scale(0.6);
+    opacity: 0;
+  }
 }
 </style>
 </head>
@@ -138,16 +145,22 @@ function moveNoButton() {
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton, { passive: true });
 
-// ===== SERCA =====
+// ===== SERCA (POPRAWIONE) =====
 function spawnHeart() {
   const heart = document.createElement('div');
   heart.className = 'heart';
   heart.textContent = '💖';
+
   heart.style.left = Math.random() * window.innerWidth + 'px';
-  heart.style.bottom = '-30px';
+
+  // ❤️ start w losowej wysokości
+  heart.style.bottom = Math.random() * 40 + 'vh';
+
   heart.style.fontSize = (18 + Math.random() * 30) + 'px';
+  heart.style.animationDuration = (3 + Math.random() * 3) + 's';
+
   document.body.appendChild(heart);
-  setTimeout(() => heart.remove(), 5000);
+  setTimeout(() => heart.remove(), 6000);
 }
 
 // ===== SCREENSHOT + SHARE =====
@@ -189,8 +202,8 @@ document.getElementById('yes').addEventListener('click', () => {
     `;
   }, 600);
 
-  // 📸 SCREEN PO 3 SEKUNDACH
-  setTimeout(makeScreenshotAndShare, 3000);
+  // 📸 SCREEN PO PEŁNEJ ANIMACJI
+  setTimeout(makeScreenshotAndShare, 4800);
 });
 </script>
 
