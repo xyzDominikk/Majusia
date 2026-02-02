@@ -42,15 +42,16 @@ body {
   max-width: 90vw;
 }
 
-/* ===== ZDJĘCIE ===== */
-.card img {
+/* ===== ZDJĘCIE (UKRYTE NA START) ===== */
+#finalImage {
   width: 100%;
   max-width: 220px;
   border-radius: 18px;
-  margin-bottom: 18px;
-  object-fit: cover;
+  margin: 18px auto;
+  display: none;
 }
 
+/* ===== BUTTONY ===== */
 .buttons {
   display: flex;
   gap: 16px;
@@ -85,8 +86,8 @@ button {
 }
 
 @keyframes float {
-  from { transform: translateY(0) scale(1); opacity:1; }
-  to   { transform: translateY(-120vh) scale(0.8); opacity:1; }
+  from { transform: translateY(0) scale(1); }
+  to   { transform: translateY(-120vh) scale(0.8); }
 }
 </style>
 </head>
@@ -97,10 +98,10 @@ button {
 
 <div class="card" id="card">
 
-  <!-- 👇 ZDJĘCIE NAD NAPISEM -->
-  <img src="image-removebg-preview.jpg"
-
   <h1 id="title">Czy zostaniesz moją walentynką? 💘</h1>
+
+  <!-- ZDJĘCIE – POJAWIA SIĘ PO ANIMACJI -->
+  <img id="finalImage" src="image-removebg-preview.jpg" alt="💖">
 
   <div class="buttons" id="buttons">
     <button id="yes">Tak 💖</button>
@@ -116,6 +117,7 @@ const yesBtn = document.getElementById('yes');
 const shareBtn = document.getElementById('share');
 const buttons = document.getElementById('buttons');
 const title = document.getElementById('title');
+const image = document.getElementById('finalImage');
 
 let hearts = [];
 
@@ -147,10 +149,13 @@ yesBtn.addEventListener('click', () => {
   title.innerHTML = '💖 YAAAAY 💖<br>Wiedziałem 😍';
   buttons.style.display = 'none';
 
+  // START ANIMACJI
   for (let i = 0; i < 80; i++) spawnHeart();
 
+  // PO 3 SEKUNDACH: STOP + ZDJĘCIE
   setTimeout(() => {
     hearts.forEach(h => h.style.animation = 'none');
+    image.style.display = 'block';
     shareBtn.style.display = 'inline-block';
   }, 3000);
 });
