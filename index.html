@@ -91,10 +91,6 @@ button {
   </div>
 </div>
 
-<audio id="sound" preload="auto">
-  <source src="https://www.soundjay.com/buttons/sounds/button-09.mp3">
-</audio>
-
 <script>
 // ===== FULLSCREEN (iOS SAFE) =====
 document.body.addEventListener('click', () => {
@@ -146,10 +142,6 @@ function heartBurst() {
 // ===== CLICK "TAK" =====
 document.getElementById('yes').addEventListener('click', () => {
 
-  const sound = document.getElementById('sound');
-  sound.currentTime = 0;
-  sound.play().catch(()=>{});
-
   heartBurst();
 
   const card = document.getElementById('card');
@@ -166,4 +158,3 @@ document.getElementById('yes').addEventListener('click', () => {
 
 </body>
 </html>
-
