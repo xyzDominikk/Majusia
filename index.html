@@ -38,20 +38,18 @@ body {
   border-radius: 25px;
   text-align: center;
   box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-  z-index: 2;
+  z-index: 5;
   max-width: 90vw;
 }
 
-/* ===== ZDJĘCIE (UKRYTE NA START) ===== */
-#finalImage {
+.card img {
   width: 100%;
   max-width: 220px;
   border-radius: 18px;
-  margin: 18px auto;
+  margin-top: 20px;
   display: none;
 }
 
-/* ===== BUTTONY ===== */
 .buttons {
   display: flex;
   gap: 16px;
@@ -68,7 +66,7 @@ button {
 }
 
 #yes { background:#4CAF50; color:white; }
-#no  { background:#f44336; color:white; position:relative; }
+#no  { background:#f44336; color:white; }
 
 #share {
   background: #ff4d6d;
@@ -77,10 +75,9 @@ button {
   display: none;
 }
 
-/* ===== SERCA ===== */
+/* SERCA */
 .heart {
   position: fixed;
-  font-size: 26px;
   pointer-events: none;
   animation: float 3s linear forwards;
 }
@@ -97,16 +94,14 @@ button {
 <div class="footer-text">Dla Majusi 💖</div>
 
 <div class="card" id="card">
-
   <h1 id="title">Czy zostaniesz moją walentynką? 💘</h1>
-
-  <!-- ZDJĘCIE – POJAWIA SIĘ PO ANIMACJI -->
-  <img id="finalImage" src="image-removebg-preview.png" alt="🥰🥰">
 
   <div class="buttons" id="buttons">
     <button id="yes">Tak 💖</button>
     <button id="no">Nie 💔</button>
   </div>
+
+  <img id="finalImage" src="image-removebg-preview.png" alt="🥰">
 
   <button id="share">Udostępnij 💌</button>
 </div>
@@ -118,10 +113,11 @@ const shareBtn = document.getElementById('share');
 const buttons = document.getElementById('buttons');
 const title = document.getElementById('title');
 const image = document.getElementById('finalImage');
+const card = document.getElementById('card');
 
 let hearts = [];
 
-/* UCIEKAJĄCY "NIE" */
+/* UCIEKAJĄCY NIE */
 function moveNoButton() {
   const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
   const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
@@ -132,27 +128,44 @@ function moveNoButton() {
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
-/* SERCA */
+/* POZYCJA KARTY */
+function getCardRect() {
+  return card.getBoundingClientRect();
+}
+
+/* SERCA – TYLKO DOOKOŁA KARTY */
 function spawnHeart() {
+  const rect = getCardRect();
+  let x, y, ok = false;
+
+  while (!ok) {
+    x = Math.random() * window.innerWidth;
+    y = Math.random() * window.innerHeight;
+
+    const outsideX = x < rect.left - 20 || x > rect.right + 20;
+    const outsideY = y < rect.top - 20 || y > rect.bottom + 20;
+
+    ok = outsideX || outsideY;
+  }
+
   const h = document.createElement('div');
   h.className = 'heart';
   h.textContent = '💖';
-  h.style.left = Math.random() * window.innerWidth + 'px';
-  h.style.top = Math.random() * window.innerHeight + 'px';
-  h.style.fontSize = (18 + Math.random() * 30) + 'px';
+  h.style.left = x + 'px';
+  h.style.top = y + 'px';
+  h.style.fontSize = (20 + Math.random() * 28) + 'px';
+
   document.body.appendChild(h);
   hearts.push(h);
 }
 
-/* KLIK "TAK" */
+/* KLIK TAK */
 yesBtn.addEventListener('click', () => {
-  title.innerHTML = '💖 YAAAAAAY 💖<br>Dzięki Majciaaa😍';
+  title.innerHTML = '💖 WIEDZIAŁEM 💖<br>Dzięki Majciaaa 😍';
   buttons.style.display = 'none';
 
-  // START ANIMACJI
-  for (let i = 0; i < 80; i++) spawnHeart();
+  for (let i = 0; i < 90; i++) spawnHeart();
 
-  // PO 3 SEKUNDACH: STOP + ZDJĘCIE
   setTimeout(() => {
     hearts.forEach(h => h.style.animation = 'none');
     image.style.display = 'block';
@@ -160,13 +173,20 @@ yesBtn.addEventListener('click', () => {
   }, 3000);
 });
 
-/* SCREEN + SHARE */
+/* SCREENSHOT + SHARE */
 shareBtn.addEventListener('click', async () => {
-  const canvas = await html2canvas(document.body, { scale: window.devicePixelRatio });
+  const canvas = await html2canvas(document.body, {
+    scale: window.devicePixelRatio
+  });
+
   canvas.toBlob(async blob => {
     const file = new File([blob], 'walentynka.png', { type: 'image/png' });
+
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Walentynka 💖' });
+      await navigator.share({
+        files: [file],
+        title: 'Walentynka 💖'
+      });
     } else {
       const a = document.createElement('a');
       a.href = canvas.toDataURL();
