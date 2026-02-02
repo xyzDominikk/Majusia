@@ -164,3 +164,27 @@ document.getElementById('yes').addEventListener('click', () => {
 
   const card = document.getElementById('card');
   card.classList.add('bounce');
+
+    // DESZCZ SERC PRZEZ 4 SEKUNDY
+  let heartRain = setInterval(() => {
+    for (let i = 0; i < 5; i++) {
+      spawnFlyingHeart();
+    }
+  }, 180);
+
+  setTimeout(() => {
+    clearInterval(heartRain);
+  }, 4000);
+
+  setTimeout(() => {
+    card.innerHTML = `
+      <h1 style="color:#ff4d6d;">💖 YAAAAY 💖</h1>
+      <p style="font-size:22px;">Wiedziałem 😍</p>
+    `;
+  }, 600);
+});
+</script>
+
+</body>
+</html>
+
