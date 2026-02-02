@@ -21,7 +21,7 @@ body {
   align-items: center;
 }
 
-/* ===== NAPIS NA DOLE ===== */
+/* ===== TEKST NA DOLE ===== */
 .footer-text {
   position: fixed;
   bottom: 18px;
@@ -51,7 +51,7 @@ body {
   width: 100%;
   max-width: 220px;
   border-radius: 18px;
-  margin: 20px auto 0;
+  margin-top: 20px;
   display: none;
 }
 
@@ -61,6 +61,7 @@ body {
   gap: 16px;
   justify-content: center;
   margin-top: 20px;
+  position: relative;
 }
 
 button {
@@ -69,13 +70,13 @@ button {
   border: none;
   border-radius: 14px;
   cursor: pointer;
-  position: relative;
   z-index: 20;
 }
 
 #yes { background:#4CAF50; color:white; }
 #no  { background:#f44336; color:white; }
 
+/* SHARE */
 #share {
   background: #ff4d6d;
   color: white;
@@ -87,7 +88,7 @@ button {
 .heart {
   position: fixed;
   font-size: 26px;
-  pointer-events: none; /* 🔥 HITBOX FIX */
+  pointer-events: none; /* 🔥 NAJWAŻNIEJSZE */
   z-index: 1;
   animation: float 3s linear forwards;
 }
@@ -104,10 +105,8 @@ button {
 <div class="footer-text">Dla Majusi 💖</div>
 
 <div class="card" id="card">
-
   <h1 id="title">Czy zostaniesz moją walentynką? 💘</h1>
 
-  <!-- ZDJĘCIE -->
   <img id="finalImage" src="image-removebg-preview.png" alt="🐶">
 
   <div class="buttons" id="buttons">
@@ -129,14 +128,17 @@ const card = document.getElementById('card');
 
 let hearts = [];
 
-/* ===== UCIEKAJĄCY "NIE" ===== */
+/* ===== UCIEKANIE "NIE" (BEZ ZMIANY POZYCJI) ===== */
 function moveNoButton() {
-  const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-  const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
-  noBtn.style.position = 'fixed';
-  noBtn.style.left = x + 'px';
-  noBtn.style.top = y + 'px';
+  const maxX = 120;
+  const maxY = 120;
+
+  const x = (Math.random() * maxX) - maxX / 2;
+  const y = (Math.random() * maxY) - maxY / 2;
+
+  noBtn.style.transform = `translate(${x}px, ${y}px)`;
 }
+
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
@@ -146,18 +148,17 @@ function spawnHeart() {
   h.className = 'heart';
   h.textContent = '💖';
 
-  const padding = 100;
   const cardRect = card.getBoundingClientRect();
-
   let x, y;
+
   do {
     x = Math.random() * window.innerWidth;
     y = Math.random() * window.innerHeight;
   } while (
-    x > cardRect.left - padding &&
-    x < cardRect.right + padding &&
-    y > cardRect.top - padding &&
-    y < cardRect.bottom + padding
+    x > cardRect.left - 80 &&
+    x < cardRect.right + 80 &&
+    y > cardRect.top - 80 &&
+    y < cardRect.bottom + 80
   );
 
   h.style.left = x + 'px';
@@ -170,7 +171,7 @@ function spawnHeart() {
 
 /* ===== KLIK "TAK" ===== */
 yesBtn.addEventListener('click', () => {
-  title.innerHTML = '💖 WAAAAAY 💖<br>Dzięki Majciaaa 😍';
+  title.innerHTML = '💖 YAAAAY 💖<br>Dzięki Majciaaa 😍';
   buttons.style.display = 'none';
 
   for (let i = 0; i < 90; i++) spawnHeart();
@@ -182,7 +183,7 @@ yesBtn.addEventListener('click', () => {
   }, 3000);
 });
 
-/* ===== SCREENSHOT + SHARE ===== */
+/* ===== SCREENSHOT ===== */
 shareBtn.addEventListener('click', async () => {
   const canvas = await html2canvas(document.body, {
     scale: window.devicePixelRatio
@@ -192,10 +193,7 @@ shareBtn.addEventListener('click', async () => {
     const file = new File([blob], 'walentynka.png', { type: 'image/png' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: 'Walentynka 💖'
-      });
+      await navigator.share({ files: [file], title: 'Walentynka 💖' });
     } else {
       const a = document.createElement('a');
       a.href = canvas.toDataURL();
