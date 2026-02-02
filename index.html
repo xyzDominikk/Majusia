@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Walentynka 💖</title>
 
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
 <style>
 * { box-sizing: border-box; }
 
@@ -89,16 +91,10 @@ button {
   <div class="counter">Próby kliknięcia „Nie”: <span id="count">0</span></div>
 </div>
 
-<audio id="sound">
-  <source src="https://www.soundjay.com/buttons/sounds/button-09.mp3">
-</audio>
-
 <script>
 // FULLSCREEN
 document.body.addEventListener('click', () => {
-  if (document.documentElement.requestFullscreen) {
-    document.documentElement.requestFullscreen().catch(()=>{});
-  }
+  document.documentElement.requestFullscreen?.().catch(()=>{});
 }, { once: true });
 
 // UCIEKANIE + LICZNIK
@@ -119,17 +115,15 @@ noBtn.addEventListener('mouseover', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
 // SERDUSZKA
-function createHeart() {
+setInterval(() => {
   const heart = document.createElement('div');
   heart.className = 'heart';
-  heart.innerHTML = '💖';
+  heart.textContent = '💖';
   heart.style.left = Math.random() * 100 + 'vw';
   heart.style.bottom = '0';
-  heart.style.fontSize = (20 + Math.random() * 20) + 'px';
   document.body.appendChild(heart);
   setTimeout(() => heart.remove(), 4000);
-}
-setInterval(createHeart, 300);
+}, 300);
 
 // CONFETTI
 function launchConfetti() {
@@ -138,21 +132,32 @@ function launchConfetti() {
     c.className = 'confetti';
     c.style.left = Math.random() * 100 + 'vw';
     c.style.background = `hsl(${Math.random()*360},100%,50%)`;
-    c.style.animationDuration = (2 + Math.random() * 2) + 's';
     document.body.appendChild(c);
     setTimeout(() => c.remove(), 4000);
   }
 }
 
-// TAK
-document.getElementById('yes').addEventListener('click', () => {
-  document.getElementById('sound').play();
+// SCREEN + SHARE
+document.getElementById('yes').addEventListener('click', async () => {
   launchConfetti();
-  document.body.innerHTML = `
-    <h1 style="color:white;text-align:center;">
-      🎉💖 YAAAAY 💖🎉<br><br>
-      Wiedziałem 😍
-    </h1>`;
+
+  const canvas = await html2canvas(document.body);
+  canvas.toBlob(blob => {
+    const file = new File([blob], 'walentynka.png', { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      navigator.share({
+        files: [file],
+        title: '💖 Odpowiedź 💖',
+        text: 'Powiedziała TAK 😍'
+      });
+    } else {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL();
+      a.download = 'walentynka.png';
+      a.click();
+    }
+  });
 });
 </script>
 
