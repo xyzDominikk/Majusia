@@ -72,12 +72,12 @@ button {
   position: fixed;
   font-size: 26px;
   pointer-events: none;
-  animation: float 4s linear forwards;
+  animation: float 3s linear forwards;
 }
 
 @keyframes float {
-  from { transform: translateY(0); opacity:1; }
-  to   { transform: translateY(-120vh); opacity:0; }
+  from { transform: translateY(0) scale(1); opacity:1; }
+  to   { transform: translateY(-120vh) scale(0.8); opacity:1; }
 }
 </style>
 </head>
@@ -106,82 +106,7 @@ const title = document.getElementById('title');
 
 let hearts = [];
 
-// ===== UCIEKAJĄCY "NIE" =====
+/* ===== UCIEKAJĄCY "NIE" ===== */
 function moveNoButton() {
   const margin = 12;
-  const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - margin);
-  const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - margin);
-  noBtn.style.position = 'fixed';
-  noBtn.style.left = x + 'px';
-  noBtn.style.top = y + 'px';
-}
-noBtn.addEventListener('mouseenter', moveNoButton);
-noBtn.addEventListener('touchstart', moveNoButton);
-
-// ===== SERCA =====
-function spawnHeart() {
-  const h = document.createElement('div');
-  h.className = 'heart';
-  h.textContent = '💖';
-  h.style.left = Math.random() * window.innerWidth + 'px';
-  h.style.bottom = Math.random() * 40 + 'vh';
-  h.style.fontSize = (18 + Math.random() * 30) + 'px';
-  document.body.appendChild(h);
-  hearts.push(h);
-}
-
-// ===== KLIK "TAK" =====
-yesBtn.addEventListener('click', () => {
-
-  title.innerHTML = '💖 YAAAAY 💖<br>Dzięki Majciaaa😍';
-  buttons.style.display = 'none';
-
-  // animacja serc
-  const rain = setInterval(() => {
-    for (let i = 0; i < 6; i++) spawnHeart();
-  }, 160);
-
-  setTimeout(() => {
-    clearInterval(rain);
-
-    // 🔒 ZAMRAŻAMY SERCA (ważne!)
-    hearts.forEach(h => {
-      h.style.animation = 'none';
-      h.style.opacity = '1';
-    });
-
-    // pokaż share
-    shareBtn.style.display = 'inline-block';
-  }, 3500);
-});
-
-// ===== SCREEN + SHARE (Z SERCAMI) =====
-shareBtn.addEventListener('click', async () => {
-
-  const canvas = await html2canvas(document.body, {
-    scale: window.devicePixelRatio,
-    useCORS: true
-  });
-
-  canvas.toBlob(async blob => {
-    const file = new File([blob], 'walentynka.png', { type: 'image/png' });
-
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: '💖 Walentynka 💖',
-        text: 'Powiedziała TAK 😍'
-      });
-    } else {
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL();
-      a.download = 'walentynka.png';
-      a.click();
-    }
-  });
-});
-</script>
-
-</body>
-</html>
-
+  const x = Math.random() * (window.innerWidth - noBt*
