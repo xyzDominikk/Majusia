@@ -50,7 +50,7 @@ body {
   width: 100%;
   max-width: 220px;
   border-radius: 18px;
-  margin: 20px auto 0;
+  margin-top: 20px;
   display: none;
 }
 
@@ -75,8 +75,7 @@ button {
 #no {
   background:#f44336;
   color:white;
-  will-change: transform;
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 #share {
@@ -91,9 +90,9 @@ button {
   position: fixed;
   pointer-events: none;
   font-size: 26px;
-  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-              left 0.8s cubic-bezier(0.22, 1, 0.36, 1),
-              top 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+  transition:
+    left 0.9s cubic-bezier(0.22, 1, 0.36, 1),
+    top  0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
 </style>
 </head>
@@ -126,27 +125,10 @@ const card     = document.getElementById('card');
 
 let hearts = [];
 
-/* ===== UCIEKANIE "NIE" ===== */
+/* ===== UCIEKANIE "NIE" – BEZ ZMIANY POZYCJI ===== */
 function moveNoButton() {
-  const yesRect = yesBtn.getBoundingClientRect();
-  const noRect  = noBtn.getBoundingClientRect();
-  const minDistance = 140;
-
-  let x, y, ok = false;
-
-  while (!ok) {
-    x = (Math.random() * 320) - 160;
-    y = (Math.random() * 220) - 110;
-
-    const futureX = noRect.left + x;
-    const futureY = noRect.top + y;
-
-    const dx = futureX - yesRect.left;
-    const dy = futureY - yesRect.top;
-
-    if (Math.sqrt(dx*dx + dy*dy) > minDistance) ok = true;
-  }
-
+  const x = (Math.random() * 240) - 120;
+  const y = (Math.random() * 180) - 90;
   noBtn.style.transform = `translate(${x}px, ${y}px)`;
 }
 
@@ -154,39 +136,39 @@ noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
 /* ===== LOSOWE SERCA (FAZA 1) ===== */
-function spawnRandomHeart() {
+function spawnHeart() {
   const h = document.createElement('div');
   h.className = 'heart';
   h.textContent = '💖';
 
   h.style.left = Math.random() * window.innerWidth + 'px';
   h.style.top  = Math.random() * window.innerHeight + 'px';
+  h.style.fontSize = (20 + Math.random() * 26) + 'px';
 
   document.body.appendChild(h);
   hearts.push(h);
 }
 
-/* ===== UKŁADANIE SERC DOOKOŁA KARTY (FAZA 2) ===== */
-function arrangeHeartsAroundCard() {
+/* ===== ROZRZUCENIE SERC DOOKOŁA KARTY (FAZA 2) ===== */
+function scatterHeartsAroundCard() {
   const rect = card.getBoundingClientRect();
-  const padding = 40;
-  const count = hearts.length;
+  const margin = 30;
 
-  hearts.forEach((h, i) => {
-    const angle = (i / count) * Math.PI * 2;
+  hearts.forEach(h => {
+    let x, y, ok = false;
 
-    const radiusX = rect.width / 2 + padding;
-    const radiusY = rect.height / 2 + padding;
+    while (!ok) {
+      x = Math.random() * window.innerWidth;
+      y = Math.random() * window.innerHeight;
 
-    const centerX = rect.left + rect.width / 2;
-    const centerY = rect.top  + rect.height / 2;
+      const outsideX = x < rect.left - margin || x > rect.right + margin;
+      const outsideY = y < rect.top  - margin || y > rect.bottom + margin;
 
-    const x = centerX + Math.cos(angle) * radiusX;
-    const y = centerY + Math.sin(angle) * radiusY;
+      ok = outsideX || outsideY;
+    }
 
     h.style.left = x + 'px';
     h.style.top  = y + 'px';
-    h.style.transform = 'translate(-50%, -50%)';
   });
 }
 
@@ -195,18 +177,16 @@ yesBtn.addEventListener('click', () => {
   title.innerHTML = '💖 YEEEEEY 💖<br>Dzięki Majciaaa 😍';
   buttons.style.display = 'none';
 
-  // FAZA 1: chaos
-  for (let i = 0; i < 60; i++) spawnRandomHeart();
+  for (let i = 0; i < 70; i++) spawnHeart();
 
-  // FAZA 2: porządek
   setTimeout(() => {
-    arrangeHeartsAroundCard();
+    scatterHeartsAroundCard();
     image.style.display = 'block';
     shareBtn.style.display = 'inline-block';
   }, 3000);
 });
 
-/* ===== SCREENSHOT + SHARE (DZIAŁA) ===== */
+/* ===== SCREENSHOT + SHARE ===== */
 shareBtn.addEventListener('click', async () => {
   const canvas = await html2canvas(document.body, {
     scale: window.devicePixelRatio
@@ -216,10 +196,7 @@ shareBtn.addEventListener('click', async () => {
     const file = new File([blob], 'walentynka.png', { type: 'image/png' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: 'Walentynka 💖'
-      });
+      await navigator.share({ files: [file], title: 'Walentynka 💖' });
     } else {
       const a = document.createElement('a');
       a.href = canvas.toDataURL();
@@ -232,3 +209,4 @@ shareBtn.addEventListener('click', async () => {
 
 </body>
 </html>
+
