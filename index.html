@@ -58,18 +58,19 @@ button {
 
 .heart {
   position: fixed;
-  color: #ff4d6d;
-  font-size: 24px;
+  font-size: 26px;
   animation: floatUp 4s linear forwards;
   pointer-events: none;
+  will-change: transform;
 }
 
 .confetti {
   position: fixed;
   width: 10px;
   height: 10px;
-  animation: fall 3s linear forwards;
+  animation: fall 3.5s linear forwards;
   pointer-events: none;
+  will-change: transform;
 }
 
 @keyframes floatUp {
@@ -78,7 +79,7 @@ button {
 }
 
 @keyframes fall {
-  from { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  from { transform: translateY(0) rotate(0deg); opacity: 1; }
   to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
 }
 </style>
@@ -90,16 +91,20 @@ button {
   <h1>Czy zostaniesz moją walentynką? 💘</h1>
   <button id="yes">Tak 💖</button>
   <button id="no">Nie 💔</button>
-  <div class="counter">Próby kliknięcia „Nie”: <span id="count">0</span></div>
+  <div class="counter">
+    Próby kliknięcia „Nie”: <span id="count">0</span>
+  </div>
 </div>
 
 <script>
-// FULLSCREEN
+// ================= FULLSCREEN (iOS SAFE) =================
 document.body.addEventListener('click', () => {
-  document.documentElement.requestFullscreen?.().catch(()=>{});
-}, { once: true });
+  if (!document.fullscreenElement) {
+    document.documentElement.requestFullscreen?.().catch(()=>{});
+  }
+});
 
-// UCIEKANIE + LICZNIK
+// ================= UCIEKAJĄCY "NIE" =================
 const noBtn = document.getElementById('no');
 let tries = 0;
 
@@ -109,6 +114,7 @@ function moveNoButton() {
 
   const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
   const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+
   noBtn.style.left = x + 'px';
   noBtn.style.top = y + 'px';
 }
@@ -116,56 +122,77 @@ function moveNoButton() {
 noBtn.addEventListener('mouseover', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
-// SERDUSZKA
+// ================= SERDUSZKA (iOS SAFE) =================
 function spawnHeart() {
   const heart = document.createElement('div');
   heart.className = 'heart';
   heart.textContent = '💖';
-  heart.style.left = Math.random() * 100 + 'vw';
-  heart.style.bottom = '0';
+  heart.style.left = Math.random() * window.innerWidth + 'px';
+  heart.style.bottom = '0px';
+
   document.body.appendChild(heart);
+
   setTimeout(() => heart.remove(), 4000);
 }
 
-// CONFETTI
+// ================= CONFETTI (iOS SAFE) =================
 function launchConfetti() {
+  const width = window.innerWidth;
+
   for (let i = 0; i < 120; i++) {
-    const c = document.createElement('div');
-    c.className = 'confetti';
-    c.style.left = Math.random() * 100 + 'vw';
-    c.style.background = `hsl(${Math.random()*360},100%,50%)`;
-    document.body.appendChild(c);
-    setTimeout(() => c.remove(), 4000);
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * width + 'px';
+    confetti.style.top = '-20px';
+    confetti.style.backgroundColor =
+      `hsl(${Math.random() * 360}, 100%, 50%)`;
+
+    document.body.appendChild(confetti);
+
+    setTimeout(() => confetti.remove(), 3500);
   }
 }
 
-// SCREEN + SHARE + WATERMARK
+// ================= iOS RENDER FIX =================
+function nextFrameIOS() {
+  return new Promise(resolve => {
+    requestAnimationFrame(() => {
+      setTimeout(resolve, 50);
+    });
+  });
+}
+
+// ================= CLICK "TAK" =================
 document.getElementById('yes').addEventListener('click', async () => {
-  // 1. Uruchom animacje
+
   launchConfetti();
-  for (let i=0; i<20; i++) spawnHeart();
+  for (let i = 0; i < 25; i++) spawnHeart();
 
-  // 2. Odczekaj 1 sekundę, żeby animacje się pokazały
-  await new Promise(r => setTimeout(r, 1000));
+  // poczekaj aż Safari wyrenderuje animacje
+  await nextFrameIOS();
+  await new Promise(r => setTimeout(r, 1500));
 
-  // 3. Zrób snapshot
-  const canvas = await html2canvas(document.body);
+  const canvas = await html2canvas(document.body, {
+    useCORS: true,
+    backgroundColor: null,
+    scale: window.devicePixelRatio
+  });
 
-  // 4. Dodaj watermark
+  // watermark
   const ctx = canvas.getContext('2d');
-  ctx.font = '50px Arial';
-  ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+  ctx.font = 'bold 50px Arial';
+  ctx.fillStyle = 'rgba(255,0,0,0.7)';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
-  ctx.fillText('POWIEDZIAŁA TAKK', canvas.width/2, canvas.height/2);
+  ctx.fillText('POWIEDZIAŁA TAK 💖', canvas.width / 2, canvas.height / 2);
 
-  // 5. Udostępnianie / pobieranie
   canvas.toBlob(blob => {
     const file = new File([blob], 'walentynka.png', { type: 'image/png' });
+
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       navigator.share({
         files: [file],
-        title: '💖 Odpowiedź 💖',
+        title: '💖 Walentynka 💖',
         text: 'Powiedziała TAK 😍'
       });
     } else {
