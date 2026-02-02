@@ -21,7 +21,7 @@ body {
   align-items: center;
 }
 
-/* ===== TEKST NA DOLE ===== */
+/* ===== TEKST W TLE ===== */
 .footer-text {
   position: fixed;
   bottom: 18px;
@@ -29,41 +29,29 @@ body {
   text-align: center;
   font-size: 28px;
   font-weight: bold;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.6);
   pointer-events: none;
-  z-index: 2;
 }
 
 /* ===== KARTA ===== */
 .card {
-  position: relative;
   background: white;
   padding: 30px;
   border-radius: 25px;
   text-align: center;
   box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-  z-index: 10;
+  z-index: 2;
   max-width: 90vw;
-  will-change: transform;
-  transition: transform 0.15s ease-out;
 }
 
-/* ===== ZDJĘCIE ===== */
-.card img {
-  width: 100%;
-  max-width: 220px;
-  border-radius: 18px;
-  margin-top: 20px;
-  display: none;
-}
+h1 { margin-top: 0; }
 
-/* ===== GUZIKI ===== */
+/* ===== PRZYCISKI ===== */
 .buttons {
   display: flex;
-  gap: 16px;
+  gap: 18px;
   justify-content: center;
   margin-top: 20px;
-  position: relative;
 }
 
 button {
@@ -72,15 +60,22 @@ button {
   border: none;
   border-radius: 14px;
   cursor: pointer;
-  z-index: 20;
 }
 
-#yes { background:#4CAF50; color:white; }
-#no  { background:#f44336; color:white; }
+/* 🔙 STARE KOLORY */
+#yes {
+  background: #4CAF50; /* ZIELONY */
+  color: white;
+}
 
-/* SHARE */
+#no {
+  background: #f44336; /* CZERWONY */
+  color: white;
+}
+
+/* ===== SHARE ===== */
 #share {
-  background: #ff4d6d;
+  background: #4CAF50;
   color: white;
   margin-top: 22px;
   display: none;
@@ -91,14 +86,18 @@ button {
   position: fixed;
   font-size: 26px;
   pointer-events: none;
-  z-index: 1;
   animation: float 3s ease-out forwards;
-  will-change: transform;
 }
 
 @keyframes float {
-  from { transform: translateY(0) scale(1); }
-  to   { transform: translateY(-120vh) scale(0.8); }
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-120vh) scale(0.8);
+    opacity: 1;
+  }
 }
 </style>
 </head>
@@ -109,8 +108,6 @@ button {
 
 <div class="card" id="card">
   <h1 id="title">Czy zostaniesz moją walentynką? 💘</h1>
-
-  <img id="finalImage" src="image-removebg-preview.png">
 
   <div class="buttons" id="buttons">
     <button id="yes">Tak 💖</button>
@@ -126,15 +123,12 @@ const yesBtn = document.getElementById('yes');
 const shareBtn = document.getElementById('share');
 const buttons = document.getElementById('buttons');
 const title = document.getElementById('title');
-const finalImage = document.getElementById('finalImage');
-const card = document.getElementById('card');
 
 let hearts = [];
-let parallaxEnabled = false;
 
-/* ===== UCIEKANIE "NIE" (BEZ ZMIANY POZYCJI) ===== */
+/* ===== UCIEKANIE "NIE" (BEZ ZMIANY POZYCJI TAK) ===== */
 function moveNoButton() {
-  const rangeX = window.innerWidth * 0.6;
+  const rangeX = window.innerWidth * 0.5;
   const rangeY = window.innerHeight * 0.4;
 
   const x = (Math.random() * rangeX) - rangeX / 2;
@@ -143,28 +137,26 @@ function moveNoButton() {
   noBtn.style.transform = `translate(${x}px, ${y}px)`;
 }
 
-/* ===== SERCA DOOKOŁA KARTY ===== */
+noBtn.addEventListener('mouseenter', moveNoButton);
+noBtn.addEventListener('touchstart', moveNoButton);
+
+/* ===== SERCA DOOKOŁA ===== */
 function spawnHeart() {
   const h = document.createElement('div');
   h.className = 'heart';
   h.textContent = '💖';
 
-  const cardRect = card.getBoundingClientRect();
+  const side = Math.floor(Math.random() * 4);
   let x, y;
 
-  do {
-    x = Math.random() * window.innerWidth;
-    y = Math.random() * window.innerHeight;
-  } while (
-    x > cardRect.left - 80 &&
-    x < cardRect.right + 80 &&
-    y > cardRect.top - 80 &&
-    y < cardRect.bottom + 80
-  );
+  if (side === 0) { x = Math.random() * window.innerWidth; y = window.innerHeight + 40; }
+  if (side === 1) { x = Math.random() * window.innerWidth; y = -40; }
+  if (side === 2) { x = -40; y = Math.random() * window.innerHeight; }
+  if (side === 3) { x = window.innerWidth + 40; y = Math.random() * window.innerHeight; }
 
   h.style.left = x + 'px';
   h.style.top = y + 'px';
-  h.style.fontSize = (18 + Math.random() * 30) + 'px';
+  h.style.fontSize = (18 + Math.random() * 28) + 'px';
 
   document.body.appendChild(h);
   hearts.push(h);
@@ -172,20 +164,18 @@ function spawnHeart() {
 
 /* ===== KLIK "TAK" ===== */
 yesBtn.addEventListener('click', () => {
-  title.innerHTML = '💖 YAAAAAY 💖<br>Dzięki Majciaaa😍';
+  title.innerHTML = '💖 YAAAAY 💖<br>Wiedziałem 😍';
   buttons.style.display = 'none';
-  parallaxEnabled = true;
 
   for (let i = 0; i < 90; i++) spawnHeart();
 
   setTimeout(() => {
     hearts.forEach(h => h.style.animation = 'none');
-    finalImage.style.display = 'block';
     shareBtn.style.display = 'inline-block';
   }, 3000);
 });
 
-/* ===== SCREENSHOT ===== */
+/* ===== SCREENSHOT + SHARE ===== */
 shareBtn.addEventListener('click', async () => {
   const canvas = await html2canvas(document.body, {
     scale: window.devicePixelRatio
@@ -204,22 +194,8 @@ shareBtn.addEventListener('click', async () => {
     }
   });
 });
-
-/* ===== MICRO PARALLAX (iPHONE STYLE) ===== */
-window.addEventListener('deviceorientation', e => {
-  if (!parallaxEnabled) return;
-  if (e.gamma === null || e.beta === null) return;
-
-  const tiltX = e.gamma / 30;
-  const tiltY = e.beta / 30;
-
-  card.style.transform = `translate(${tiltX}px, ${tiltY}px)`;
-
-  hearts.forEach(h => {
-    h.style.transform = `translate(${tiltX * 0.4}px, ${tiltY * 0.4}px)`;
-  });
-}, true);
 </script>
 
 </body>
 </html>
+
