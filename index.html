@@ -48,11 +48,10 @@ body {
 
 /* ===== ZDJĘCIE ===== */
 .card img {
-  display: block;
   width: 100%;
   max-width: 220px;
-  margin: 20px auto 0;
   border-radius: 18px;
+  margin: 20px auto 0;
   display: none;
 }
 
@@ -73,15 +72,15 @@ button {
 }
 
 #yes {
-  background: #ff4d6d;
+  background: #4CAF50;
   color: white;
 }
 
 #no {
   background: #f44336;
   color: white;
-  will-change: transform;
-  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  transition: transform 0.45s ease;
 }
 
 #share {
@@ -95,13 +94,18 @@ button {
 .heart {
   position: fixed;
   pointer-events: none;
-  font-size: 26px;
   animation: float 3s linear forwards;
 }
 
 @keyframes float {
-  from { transform: translateY(0) scale(1); }
-  to   { transform: translateY(-120vh) scale(0.85); }
+  from {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-120vh) scale(0.8);
+    opacity: 1;
+  }
 }
 </style>
 </head>
@@ -135,22 +139,22 @@ const footer = document.getElementById('footer');
 
 let hearts = [];
 
-/* ===== UCIEKANIE "NIE" — BEZ RUSZANIA "TAK" ===== */
+/* ===== UCIEKANIE "NIE" – BEZ NACHODZENIA NA "TAK" ===== */
 function moveNoButton() {
   const yesRect = yesBtn.getBoundingClientRect();
-  const noRect  = noBtn.getBoundingClientRect();
+  const rangeX = 260;
+  const rangeY = 180;
 
   let x, y, ok = false;
-  const minDist = 130;
 
   while (!ok) {
-    x = (Math.random() * 300) - 150;
-    y = (Math.random() * 200) - 100;
+    x = (Math.random() * rangeX) - rangeX / 2;
+    y = (Math.random() * rangeY) - rangeY / 2;
 
-    const dx = (noRect.left + x) - yesRect.left;
-    const dy = (noRect.top + y) - yesRect.top;
+    const dx = (noBtn.offsetLeft + x) - yesRect.left;
+    const dy = (noBtn.offsetTop + y) - yesRect.top;
 
-    if (Math.sqrt(dx*dx + dy*dy) > minDist) ok = true;
+    if (Math.sqrt(dx*dx + dy*dy) > 120) ok = true;
   }
 
   noBtn.style.transform = `translate(${x}px, ${y}px)`;
@@ -159,17 +163,27 @@ function moveNoButton() {
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
-/* ===== SERCA DOOKOŁA KARTY ===== */
-function spawnHeartAroundCard(angle, radius) {
+/* ===== SERCA – JAK WCZEŚNIEJ ===== */
+function spawnHeart() {
   const rect = card.getBoundingClientRect();
-  const x = rect.left + rect.width/2 + Math.cos(angle) * radius;
-  const y = rect.top + rect.height/2 + Math.sin(angle) * radius;
+  let x, y, ok = false;
+
+  while (!ok) {
+    x = Math.random() * window.innerWidth;
+    y = Math.random() * window.innerHeight;
+
+    const outsideX = x < rect.left - 20 || x > rect.right + 20;
+    const outsideY = y < rect.top - 20 || y > rect.bottom + 20;
+
+    ok = outsideX || outsideY;
+  }
 
   const h = document.createElement('div');
   h.className = 'heart';
   h.textContent = '💖';
   h.style.left = x + 'px';
   h.style.top = y + 'px';
+  h.style.fontSize = (18 + Math.random() * 28) + 'px';
 
   document.body.appendChild(h);
   hearts.push(h);
@@ -177,15 +191,11 @@ function spawnHeartAroundCard(angle, radius) {
 
 /* ===== KLIK "TAK" ===== */
 yesBtn.addEventListener('click', () => {
-  title.innerHTML = '💖 YAAAAY 💖<br>Dzięki Majciaa😍';
+  title.innerHTML = '💖 YAAAAY 💖<br>Dzięki Majciaa 😍';
   buttons.style.display = 'none';
   footer.style.opacity = '0';
 
-  const count = 36;
-  for (let i = 0; i < count; i++) {
-    const angle = (Math.PI * 2 / count) * i;
-    spawnHeartAroundCard(angle, 220);
-  }
+  for (let i = 0; i < 90; i++) spawnHeart();
 
   setTimeout(() => {
     hearts.forEach(h => h.style.animation = 'none');
@@ -194,7 +204,7 @@ yesBtn.addEventListener('click', () => {
   }, 3000);
 });
 
-/* ===== SCREENSHOT + SHARE ===== */
+/* ===== SCREEN + SHARE ===== */
 shareBtn.addEventListener('click', async () => {
   const canvas = await html2canvas(document.body, {
     scale: window.devicePixelRatio
@@ -204,7 +214,10 @@ shareBtn.addEventListener('click', async () => {
     const file = new File([blob], 'walentynka.png', { type: 'image/png' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Walentynka 💖' });
+      await navigator.share({
+        files: [file],
+        title: 'Walentynka 💖'
+      });
     } else {
       const a = document.createElement('a');
       a.href = canvas.toDataURL();
