@@ -2,58 +2,132 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<title>Walentyka 💖</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Walentynka 💖</title>
+
 <style>
+* { box-sizing: border-box; }
+
 body {
-  font-family: Arial, sans-serif;
-  background: #ffe6f0;
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  font-family: 'Arial', sans-serif;
+  background: linear-gradient(135deg, #ff9a9e, #fad0c4);
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
-  margin: 0;
 }
+
 .card {
   background: white;
   padding: 30px;
-  border-radius: 20px;
+  border-radius: 25px;
   text-align: center;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  box-shadow: 0 15px 40px rgba(0,0,0,0.25);
+  position: relative;
+  z-index: 2;
 }
+
+h1 {
+  margin-bottom: 20px;
+}
+
 button {
-  padding: 12px 20px;
-  margin: 10px;
-  font-size: 18px;
+  padding: 14px 26px;
+  font-size: 20px;
   border: none;
-  border-radius: 10px;
+  border-radius: 14px;
   cursor: pointer;
+  position: relative;
 }
-.yes {
+
+#yes {
   background: #4CAF50;
   color: white;
 }
-.no {
+
+#no {
   background: #f44336;
   color: white;
+  position: absolute;
+}
+
+.heart {
+  position: fixed;
+  color: #ff4d6d;
+  font-size: 24px;
+  animation: floatUp 4s linear forwards;
+}
+
+@keyframes floatUp {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100vh);
+    opacity: 0;
+  }
 }
 </style>
 </head>
+
 <body>
 
 <div class="card">
-  <img src="https://i.imgur.com/4M7IWwP.png" width="150"><br><br>
-  <h2>Czy zostaniesz moją walentynką? 💘</h2>
-  <button class="yes" onclick="yes()">Tak</button>
-  <button class="no" onclick="no()">Nie</button>
+  <h1>Czy zostaniesz moją walentynką? 💘</h1>
+  <button id="yes">Tak 💖</button>
+  <button id="no">Nie 💔</button>
 </div>
 
+<audio id="sound">
+  <source src="https://www.soundjay.com/buttons/sounds/button-09.mp3" type="audio/mpeg">
+</audio>
+
 <script>
-function yes() {
-  document.body.innerHTML = "<h1>💖 YAY! 💖<br>Wiedziałem 😍</h1>";
+// FULLSCREEN NA TELEFONIE
+document.body.addEventListener('click', () => {
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(()=>{});
+  }
+}, { once: true });
+
+// UCIEKAJĄCY PRZYCISK "NIE"
+const noBtn = document.getElementById('no');
+
+function moveNoButton() {
+  const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
+  const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+  noBtn.style.left = x + 'px';
+  noBtn.style.top = y + 'px';
 }
-function no() {
-  alert("Zastanów się jeszcze 😏");
+
+noBtn.addEventListener('mouseover', moveNoButton);
+noBtn.addEventListener('touchstart', moveNoButton);
+
+// SERDUSZKA
+function createHeart() {
+  const heart = document.createElement('div');
+  heart.className = 'heart';
+  heart.innerHTML = '💖';
+  heart.style.left = Math.random() * 100 + 'vw';
+  heart.style.bottom = '0';
+  heart.style.fontSize = (20 + Math.random() * 20) + 'px';
+  document.body.appendChild(heart);
+  setTimeout(() => heart.remove(), 4000);
 }
+setInterval(createHeart, 300);
+
+// KLIK "TAK"
+document.getElementById('yes').addEventListener('click', () => {
+  document.getElementById('sound').play();
+  document.body.innerHTML = `
+    <h1 style="color:white;text-align:center;">
+      💖 YAAAAY 💖<br><br>
+      Wiedziałem 😍
+    </h1>`;
+});
 </script>
 
 </body>
