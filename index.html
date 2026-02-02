@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Walentynka 💖</title>
 
-<!-- html2canvas -->
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
@@ -38,25 +37,18 @@ body {
 /* ===== KARTA ===== */
 .card {
   background: white;
-  padding: 30px 26px 26px;
+  padding: 30px 26px;
   border-radius: 25px;
   text-align: center;
   box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-  position: relative;
   z-index: 2;
-  transition: transform 0.6s ease;
   max-width: 320px;
 }
 
-.card.bounce {
-  transform: scale(1.12);
-}
-
-/* ===== PRZYCISKI ===== */
 .buttons {
   display: flex;
-  justify-content: center;
   gap: 16px;
+  justify-content: center;
   margin-top: 20px;
 }
 
@@ -66,18 +58,10 @@ button {
   border: none;
   border-radius: 14px;
   cursor: pointer;
-  white-space: nowrap;
 }
 
-#yes { background: #4CAF50; color: white; }
-#no  { background: #f44336; color: white; position: relative; }
-
-/* ===== LICZNIK ===== */
-.counter {
-  margin-top: 14px;
-  font-size: 13px;
-  color: #666;
-}
+#yes { background:#4CAF50; color:white; }
+#no  { background:#f44336; color:white; position:relative; }
 
 /* ===== SERCA ===== */
 .heart {
@@ -88,14 +72,16 @@ button {
 }
 
 @keyframes float {
-  from {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(-120vh) scale(0.6);
-    opacity: 0;
-  }
+  from { transform: translateY(0); opacity:1; }
+  to   { transform: translateY(-120vh); opacity:0; }
+}
+
+/* ===== SHARE BUTTON ===== */
+#shareBtn {
+  display: none;
+  margin-top: 18px;
+  background: #ff4d6d;
+  color: white;
 }
 </style>
 </head>
@@ -112,27 +98,16 @@ button {
     <button id="no">Nie 💔</button>
   </div>
 
-  <div class="counter">
-    Próby ucieczki „Nie”: <span id="count">0</span>
-  </div>
+  <button id="shareBtn">Udostępnij 💖</button>
 </div>
 
 <script>
-// ===== FULLSCREEN (iOS SAFE) =====
-document.body.addEventListener('click', () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen?.().catch(()=>{});
-  }
-}, { once: true });
+const noBtn = document.getElementById('no');
+const shareBtn = document.getElementById('shareBtn');
+let screenshotBlob = null;
 
 // ===== UCIEKAJĄCY "NIE" =====
-const noBtn = document.getElementById('no');
-let tries = 0;
-
 function moveNoButton() {
-  tries++;
-  document.getElementById('count').textContent = tries;
-
   const margin = 16;
   const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - margin*2) + margin;
   const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - margin*2) + margin;
@@ -143,51 +118,30 @@ function moveNoButton() {
 }
 
 noBtn.addEventListener('mouseenter', moveNoButton);
-noBtn.addEventListener('touchstart', moveNoButton, { passive: true });
+noBtn.addEventListener('touchstart', moveNoButton, { passive:true });
 
-// ===== SERCA (POPRAWIONE) =====
+// ===== SERCA =====
 function spawnHeart() {
-  const heart = document.createElement('div');
-  heart.className = 'heart';
-  heart.textContent = '💖';
-
-  heart.style.left = Math.random() * window.innerWidth + 'px';
-
-  // ❤️ start w losowej wysokości
-  heart.style.bottom = Math.random() * 40 + 'vh';
-
-  heart.style.fontSize = (18 + Math.random() * 30) + 'px';
-  heart.style.animationDuration = (3 + Math.random() * 3) + 's';
-
-  document.body.appendChild(heart);
-  setTimeout(() => heart.remove(), 6000);
+  const h = document.createElement('div');
+  h.className = 'heart';
+  h.textContent = '💖';
+  h.style.left = Math.random() * window.innerWidth + 'px';
+  h.style.bottom = Math.random() * 40 + 'vh';
+  h.style.fontSize = (18 + Math.random() * 30) + 'px';
+  document.body.appendChild(h);
+  setTimeout(() => h.remove(), 6000);
 }
 
-// ===== SCREENSHOT + SHARE =====
-async function makeScreenshotAndShare() {
+// ===== SCREENSHOT =====
+async function makeScreenshot() {
   const canvas = await html2canvas(document.body);
-  canvas.toBlob(async (blob) => {
-    const file = new File([blob], 'walentynka.png', { type: 'image/png' });
-
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: '💖 Walentynka 💖',
-        text: 'Powiedziała TAK 😍'
-      });
-    } else {
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL();
-      a.download = 'walentynka.png';
-      a.click();
-    }
+  return new Promise(resolve => {
+    canvas.toBlob(blob => resolve(blob), 'image/png');
   });
 }
 
 // ===== KLIK "TAK" =====
-document.getElementById('yes').addEventListener('click', () => {
-  const card = document.getElementById('card');
-  card.classList.add('bounce');
+document.getElementById('yes').addEventListener('click', async () => {
 
   const rain = setInterval(() => {
     for (let i = 0; i < 6; i++) spawnHeart();
@@ -195,15 +149,29 @@ document.getElementById('yes').addEventListener('click', () => {
 
   setTimeout(() => clearInterval(rain), 4000);
 
-  setTimeout(() => {
-    card.innerHTML = `
-      <h1 style="color:#ff4d6d;">💖 YAAAAY 💖</h1>
-      <p style="font-size:22px;">Dzięki Majusiaaa 😍</p>
-    `;
-  }, 600);
+  // ⏱️ robimy screena PO animacji
+  setTimeout(async () => {
+    screenshotBlob = await makeScreenshot();
+    shareBtn.style.display = 'inline-block';
+  }, 4800);
+});
 
-  // 📸 SCREEN PO PEŁNEJ ANIMACJI
-  setTimeout(makeScreenshotAndShare, 4800);
+// ===== SHARE (USER ACTION) =====
+shareBtn.addEventListener('click', async () => {
+  const file = new File([screenshotBlob], 'walentynka.png', { type: 'image/png' });
+
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    await navigator.share({
+      files: [file],
+      title: '💖 Walentynka 💖',
+      text: 'Powiedziała TAK 😍'
+    });
+  } else {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(screenshotBlob);
+    a.download = 'walentynka.png';
+    a.click();
+  }
 });
 </script>
 
