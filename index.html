@@ -31,7 +31,7 @@ body {
   font-weight: bold;
   color: rgba(255,255,255,0.55);
   pointer-events: none;
-  z-index: 2;
+  z-index: 5;
 }
 
 /* ===== KARTA ===== */
@@ -44,8 +44,6 @@ body {
   box-shadow: 0 15px 40px rgba(0,0,0,0.25);
   z-index: 10;
   max-width: 90vw;
-  will-change: transform;
-  transition: transform 0.15s ease-out;
 }
 
 /* ===== ZDJĘCIE ===== */
@@ -90,10 +88,9 @@ button {
 .heart {
   position: fixed;
   font-size: 26px;
-  pointer-events: none;
+  pointer-events: none; /* 🔥 NAJWAŻNIEJSZE */
   z-index: 1;
-  animation: float 3s ease-out forwards;
-  will-change: transform;
+  animation: float 3s linear forwards;
 }
 
 @keyframes float {
@@ -130,15 +127,18 @@ const finalImage = document.getElementById('finalImage');
 const card = document.getElementById('card');
 
 let hearts = [];
-let parallaxEnabled = false;
 
 /* ===== UCIEKANIE "NIE" (BEZ ZMIANY POZYCJI) ===== */
 function moveNoButton() {
-  const range = 120;
-  const x = (Math.random() * range) - range / 2;
-  const y = (Math.random() * range) - range / 2;
+  const maxX = 120;
+  const maxY = 120;
+
+  const x = (Math.random() * maxX) - maxX / 2;
+  const y = (Math.random() * maxY) - maxY / 2;
+
   noBtn.style.transform = `translate(${x}px, ${y}px)`;
 }
+
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
@@ -173,7 +173,6 @@ function spawnHeart() {
 yesBtn.addEventListener('click', () => {
   title.innerHTML = '💖 YAAAAY 💖<br>Dzięki Majciaaa 😍';
   buttons.style.display = 'none';
-  parallaxEnabled = true;
 
   for (let i = 0; i < 90; i++) spawnHeart();
 
@@ -203,21 +202,6 @@ shareBtn.addEventListener('click', async () => {
     }
   });
 });
-
-/* ===== MICRO PARALLAX (iPHONE STYLE) ===== */
-window.addEventListener('deviceorientation', e => {
-  if (!parallaxEnabled) return;
-  if (e.gamma === null || e.beta === null) return;
-
-  const tiltX = e.gamma / 30;
-  const tiltY = e.beta / 30;
-
-  card.style.transform = `translate(${tiltX}px, ${tiltY}px)`;
-
-  hearts.forEach(h => {
-    h.style.transform = `translate(${tiltX * 0.4}px, ${tiltY * 0.4}px)`;
-  });
-}, true);
 </script>
 
 </body>
