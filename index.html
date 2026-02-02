@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Walentynka 💖</title>
 
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
 <style>
 * { box-sizing: border-box; }
 
@@ -58,19 +56,16 @@ button {
 
 .heart {
   position: fixed;
-  font-size: 26px;
+  color: #ff4d6d;
+  font-size: 24px;
   animation: floatUp 4s linear forwards;
-  pointer-events: none;
-  will-change: transform;
 }
 
 .confetti {
   position: fixed;
   width: 10px;
   height: 10px;
-  animation: fall 3.5s linear forwards;
-  pointer-events: none;
-  will-change: transform;
+  animation: fall 3s linear forwards;
 }
 
 @keyframes floatUp {
@@ -79,7 +74,7 @@ button {
 }
 
 @keyframes fall {
-  from { transform: translateY(0) rotate(0deg); opacity: 1; }
+  from { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
   to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
 }
 </style>
@@ -91,20 +86,22 @@ button {
   <h1>Czy zostaniesz moją walentynką? 💘</h1>
   <button id="yes">Tak 💖</button>
   <button id="no">Nie 💔</button>
-  <div class="counter">
-    Próby kliknięcia „Nie”: <span id="count">0</span>
-  </div>
+  <div class="counter">Próby kliknięcia „Nie”: <span id="count">0</span></div>
 </div>
 
-<script>
-// ================= FULLSCREEN (iOS SAFE) =================
-document.body.addEventListener('click', () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen?.().catch(()=>{});
-  }
-});
+<audio id="sound">
+  <source src="https://www.soundjay.com/buttons/sounds/button-09.mp3">
+</audio>
 
-// ================= UCIEKAJĄCY "NIE" =================
+<script>
+// FULLSCREEN
+document.body.addEventListener('click', () => {
+  if (document.documentElement.requestFullscreen) {
+    document.documentElement.requestFullscreen().catch(()=>{});
+  }
+}, { once: true });
+
+// UCIEKANIE + LICZNIK
 const noBtn = document.getElementById('no');
 let tries = 0;
 
@@ -114,7 +111,6 @@ function moveNoButton() {
 
   const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
   const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
-
   noBtn.style.left = x + 'px';
   noBtn.style.top = y + 'px';
 }
@@ -122,81 +118,44 @@ function moveNoButton() {
 noBtn.addEventListener('mouseover', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
-// ================= SERDUSZKA (iOS SAFE) =================
-function spawnHeart() {
+// SERDUSZKA
+function createHeart() {
   const heart = document.createElement('div');
   heart.className = 'heart';
-  heart.textContent = '💖';
-  heart.style.left = Math.random() * window.innerWidth + 'px';
-  heart.style.bottom = '0px';
-
+  heart.innerHTML = '💖';
+  heart.style.left = Math.random() * 100 + 'vw';
+  heart.style.bottom = '0';
+  heart.style.fontSize = (20 + Math.random() * 20) + 'px';
   document.body.appendChild(heart);
-
   setTimeout(() => heart.remove(), 4000);
 }
+setInterval(createHeart, 300);
 
-// ================= CONFETTI (iOS SAFE) =================
+// CONFETTI
 function launchConfetti() {
-  const width = window.innerWidth;
-
   for (let i = 0; i < 120; i++) {
-    const confetti = document.createElement('div');
-    confetti.className = 'confetti';
-    confetti.style.left = Math.random() * width + 'px';
-    confetti.style.top = '-20px';
-    confetti.style.backgroundColor =
-      `hsl(${Math.random() * 360}, 100%, 50%)`;
-
-    document.body.appendChild(confetti);
-
-    setTimeout(() => confetti.remove(), 3500);
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = `hsl(${Math.random()*360},100%,50%)`;
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
   }
 }
 
-// ================= iOS RENDER FIX =================
-function nextFrameIOS() {
-  return new Promise(resolve => {
-    requestAnimationFrame(() => {
-      setTimeout(resolve, 50);
-    });
-  });
-}
-
-// ================= CLICK "TAK" =================
-document.getElementById('yes').addEventListener('click', async () => {
-
+// TAK
+document.getElementById('yes').addEventListener('click', () => {
+  document.getElementById('sound').play();
   launchConfetti();
-  for (let i = 0; i < 25; i++) spawnHeart();
-
-  // poczekaj aż Safari wyrenderuje animacje
-  await nextFrameIOS();
-  await new Promise(r => setTimeout(r, 1500));
-
-  const canvas = await html2canvas(document.body, {
-    useCORS: true,
-    backgroundColor: null,
-    scale: window.devicePixelRatio
-  });
-
-
-  canvas.toBlob(blob => {
-    const file = new File([blob], 'walentynka.png', { type: 'image/png' });
-
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({
-        files: [file],
-        title: '💖 Walentynka 💖',
-        text: 'Powiedziała TAK 😍'
-      });
-    } else {
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL();
-      a.download = 'walentynka.png';
-      a.click();
-    }
-  });
+  document.body.innerHTML = `
+    <h1 style="color:white;text-align:center;">
+      🎉💖 YAAAAY 💖🎉<br><br>
+      Wiedziałem 😍
+    </h1>`;
 });
 </script>
 
 </body>
 </html>
+
