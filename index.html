@@ -98,14 +98,8 @@ button {
 }
 
 @keyframes float {
-  from {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(-120vh) scale(0.8);
-    opacity: 1;
-  }
+  from { transform: translateY(0) scale(1); opacity:1; }
+  to   { transform: translateY(-120vh) scale(0.8); opacity:1; }
 }
 </style>
 </head>
@@ -122,6 +116,7 @@ button {
     <button id="no">Nie 💔</button>
   </div>
 
+  <!-- ZDJĘCIE -->
   <img id="finalImage" src="image-removebg-preview.png" alt="🥰">
 
   <button id="share">Udostępnij 💌</button>
@@ -163,7 +158,7 @@ function moveNoButton() {
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
-/* ===== SERCA – JAK WCZEŚNIEJ ===== */
+/* ===== SERCA – LOSOWO PO EKRANIE (POZA KARTĄ) ===== */
 function spawnHeart() {
   const rect = card.getBoundingClientRect();
   let x, y, ok = false;
@@ -204,29 +199,37 @@ yesBtn.addEventListener('click', () => {
   }, 3000);
 });
 
-/* ===== SCREEN + SHARE ===== */
+/* ===== SCREENSHOT + SHARE (DZIAŁA NA iOS) ===== */
 shareBtn.addEventListener('click', async () => {
-  const canvas = await html2canvas(document.body, {
-    scale: window.devicePixelRatio
-  });
+  try {
+    const canvas = await html2canvas(document.body, {
+      scale: window.devicePixelRatio,
+      useCORS: true
+    });
 
-  canvas.toBlob(async blob => {
-    const file = new File([blob], 'walentynka.png', { type: 'image/png' });
+    const dataUrl = canvas.toDataURL('image/png');
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    if (navigator.share) {
+      const res = await fetch(dataUrl);
+      const blob = await res.blob();
+      const file = new File([blob], 'walentynka.png', { type: 'image/png' });
+
       await navigator.share({
         files: [file],
         title: 'Walentynka 💖'
       });
     } else {
       const a = document.createElement('a');
-      a.href = canvas.toDataURL();
+      a.href = dataUrl;
       a.download = 'walentynka.png';
       a.click();
     }
-  });
+  } catch (e) {
+    alert('Nie udało się udostępnić 😢');
+  }
 });
 </script>
 
 </body>
 </html>
+
