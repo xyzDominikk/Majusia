@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Walentynka 💖</title>
 
+<!-- html2canvas -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
 <style>
 * { box-sizing: border-box; }
 
@@ -55,7 +58,6 @@ body {
   justify-content: center;
   gap: 16px;
   margin-top: 20px;
-  position: relative;
 }
 
 button {
@@ -64,19 +66,10 @@ button {
   border: none;
   border-radius: 14px;
   cursor: pointer;
-  white-space: nowrap;
 }
 
-#yes {
-  background: #4CAF50;
-  color: white;
-}
-
-#no {
-  background: #f44336;
-  color: white;
-  position: relative; /* start obok TAK */
-}
+#yes { background: #4CAF50; color: white; }
+#no  { background: #f44336; color: white; position: relative; }
 
 /* ===== LICZNIK ===== */
 .counter {
@@ -94,14 +87,8 @@ button {
 }
 
 @keyframes float {
-  from {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(-120vh) scale(0.6);
-    opacity: 0;
-  }
+  from { transform: translateY(0); opacity: 1; }
+  to   { transform: translateY(-120vh); opacity: 0; }
 }
 </style>
 </head>
@@ -140,16 +127,12 @@ function moveNoButton() {
   document.getElementById('count').textContent = tries;
 
   const margin = 16;
-  const maxX = window.innerWidth - noBtn.offsetWidth - margin;
-  const maxY = window.innerHeight - noBtn.offsetHeight - margin;
-
-  const x = Math.random() * maxX + margin;
-  const y = Math.random() * maxY + margin;
+  const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - margin*2) + margin;
+  const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - margin*2) + margin;
 
   noBtn.style.position = 'fixed';
   noBtn.style.left = x + 'px';
   noBtn.style.top = y + 'px';
-  noBtn.style.transform = 'none';
 }
 
 noBtn.addEventListener('mouseenter', moveNoButton);
@@ -163,10 +146,29 @@ function spawnHeart() {
   heart.style.left = Math.random() * window.innerWidth + 'px';
   heart.style.bottom = '-30px';
   heart.style.fontSize = (18 + Math.random() * 30) + 'px';
-  heart.style.animationDuration = (3 + Math.random() * 3) + 's';
-
   document.body.appendChild(heart);
-  setTimeout(() => heart.remove(), 6000);
+  setTimeout(() => heart.remove(), 5000);
+}
+
+// ===== SCREENSHOT + SHARE =====
+async function makeScreenshotAndShare() {
+  const canvas = await html2canvas(document.body);
+  canvas.toBlob(async (blob) => {
+    const file = new File([blob], 'walentynka.png', { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: '💖 Walentynka 💖',
+        text: 'Powiedziała TAK 😍'
+      });
+    } else {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL();
+      a.download = 'walentynka.png';
+      a.click();
+    }
+  });
 }
 
 // ===== KLIK "TAK" =====
@@ -186,6 +188,9 @@ document.getElementById('yes').addEventListener('click', () => {
       <p style="font-size:22px;">Dzięki Majusiaaa 😍</p>
     `;
   }, 600);
+
+  // 📸 SCREEN PO 3 SEKUNDACH
+  setTimeout(makeScreenshotAndShare, 3000);
 });
 </script>
 
