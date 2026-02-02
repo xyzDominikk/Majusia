@@ -104,6 +104,8 @@ const shareBtn = document.getElementById('share');
 const buttons = document.getElementById('buttons');
 const title = document.getElementById('title');
 
+let hearts = [];
+
 // ===== UCIEKAJĄCY "NIE" =====
 function moveNoButton() {
   const margin = 12;
@@ -125,7 +127,7 @@ function spawnHeart() {
   h.style.bottom = Math.random() * 40 + 'vh';
   h.style.fontSize = (18 + Math.random() * 30) + 'px';
   document.body.appendChild(h);
-  setTimeout(() => h.remove(), 6000);
+  hearts.push(h);
 }
 
 // ===== KLIK "TAK" =====
@@ -134,26 +136,34 @@ yesBtn.addEventListener('click', () => {
   title.innerHTML = '💖 YAAAAY 💖<br>Dzięki Majciaaa😍';
   buttons.style.display = 'none';
 
+  // animacja serc
   const rain = setInterval(() => {
     for (let i = 0; i < 6; i++) spawnHeart();
   }, 160);
 
-  setTimeout(() => clearInterval(rain), 3500);
-
-  // pokaż share po animacji
   setTimeout(() => {
+    clearInterval(rain);
+
+    // 🔒 ZAMRAŻAMY SERCA (ważne!)
+    hearts.forEach(h => {
+      h.style.animation = 'none';
+      h.style.opacity = '1';
+    });
+
+    // pokaż share
     shareBtn.style.display = 'inline-block';
-  }, 2000);
+  }, 3500);
 });
 
-// ===== SCREEN + SHARE =====
+// ===== SCREEN + SHARE (Z SERCAMI) =====
 shareBtn.addEventListener('click', async () => {
 
   const canvas = await html2canvas(document.body, {
-    scale: window.devicePixelRatio
+    scale: window.devicePixelRatio,
+    useCORS: true
   });
 
-  canvas.toBlob(async (blob) => {
+  canvas.toBlob(async blob => {
     const file = new File([blob], 'walentynka.png', { type: 'image/png' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -174,3 +184,4 @@ shareBtn.addEventListener('click', async () => {
 
 </body>
 </html>
+
