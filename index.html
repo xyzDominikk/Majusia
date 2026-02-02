@@ -50,12 +50,12 @@ body {
   display: none;
 }
 
-
 .buttons {
   display: flex;
   gap: 16px;
   justify-content: center;
   margin-top: 20px;
+  position: relative;
 }
 
 button {
@@ -69,6 +69,7 @@ button {
 #yes { background:#4CAF50; color:white; }
 #no  { background:#f44336; color:white; }
 
+/* SHARE */
 #share {
   background: #ff4d6d;
   color: white;
@@ -118,14 +119,31 @@ const card = document.getElementById('card');
 
 let hearts = [];
 
-/* UCIEKAJĄCY NIE */
+/* ===== UCIEKANIE "NIE" – BEZ OVERLAPU I BEZ PSUĆ HITBOX ===== */
 function moveNoButton() {
-  const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-  const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
-  noBtn.style.position = 'fixed';
-  noBtn.style.left = x + 'px';
-  noBtn.style.top = y + 'px';
+  const yesRect = yesBtn.getBoundingClientRect();
+  const noRect  = noBtn.getBoundingClientRect();
+
+  const minDistance = 120; // minimalna odległość od "Tak"
+  let x, y, ok = false;
+
+  while (!ok) {
+    x = (Math.random() * 300) - 150;
+    y = (Math.random() * 200) - 100;
+
+    const futureX = noRect.left + x;
+    const futureY = noRect.top + y;
+
+    const dx = futureX - yesRect.left;
+    const dy = futureY - yesRect.top;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance > minDistance) ok = true;
+  }
+
+  noBtn.style.transform = `translate(${x}px, ${y}px)`;
 }
+
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
@@ -134,7 +152,7 @@ function getCardRect() {
   return card.getBoundingClientRect();
 }
 
-/* SERCA – TYLKO DOOKOŁA KARTY */
+/* SERCA DOOKOŁA */
 function spawnHeart() {
   const rect = getCardRect();
   let x, y, ok = false;
@@ -162,7 +180,7 @@ function spawnHeart() {
 
 /* KLIK TAK */
 yesBtn.addEventListener('click', () => {
-  title.innerHTML = '💖 YEEEEEY 💖<br>Dzięki Majciaaa 😍';
+  title.innerHTML = '💖 YEEEEEY 💖<br>Dzięki Majciaaa😍';
   buttons.style.display = 'none';
 
   for (let i = 0; i < 90; i++) spawnHeart();
@@ -184,10 +202,7 @@ shareBtn.addEventListener('click', async () => {
     const file = new File([blob], 'walentynka.png', { type: 'image/png' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: 'Walentynka 💖'
-      });
+      await navigator.share({ files: [file], title: 'Walentynka 💖' });
     } else {
       const a = document.createElement('a');
       a.href = canvas.toDataURL();
@@ -200,4 +215,3 @@ shareBtn.addEventListener('click', async () => {
 
 </body>
 </html>
-
