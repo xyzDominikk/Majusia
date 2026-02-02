@@ -21,6 +21,7 @@ body {
   align-items: center;
 }
 
+/* ===== TEKST W TLE ===== */
 .footer-text {
   position: fixed;
   bottom: 18px;
@@ -32,6 +33,7 @@ body {
   pointer-events: none;
 }
 
+/* ===== KARTA ===== */
 .card {
   background: white;
   padding: 30px;
@@ -42,6 +44,7 @@ body {
   max-width: 90vw;
 }
 
+/* ===== ZDJĘCIE ===== */
 .card img {
   width: 100%;
   max-width: 220px;
@@ -50,12 +53,12 @@ body {
   display: none;
 }
 
+/* ===== PRZYCISKI ===== */
 .buttons {
   display: flex;
   gap: 16px;
   justify-content: center;
   margin-top: 20px;
-  position: relative;
 }
 
 button {
@@ -66,10 +69,19 @@ button {
   cursor: pointer;
 }
 
-#yes { background:#4CAF50; color:white; }
-#no  { background:#f44336; color:white; }
+#yes {
+  background: #4CAF50;
+  color: white;
+}
 
-/* SHARE */
+#no {
+  background: #f44336;
+  color: white;
+  will-change: transform;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ===== SHARE ===== */
 #share {
   background: #ff4d6d;
   color: white;
@@ -77,11 +89,11 @@ button {
   display: none;
 }
 
-/* SERCA */
+/* ===== SERCA ===== */
 .heart {
   position: fixed;
   pointer-events: none;
-  animation: float 3s linear forwards;
+  animation: float 3s ease-out forwards;
 }
 
 @keyframes float {
@@ -119,17 +131,20 @@ const card = document.getElementById('card');
 
 let hearts = [];
 
-/* ===== UCIEKANIE "NIE" – BEZ OVERLAPU I BEZ PSUĆ HITBOX ===== */
+/* ===== ULTRA-SMOOTH UCIEKANIE "NIE" ===== */
+let lastX = 0;
+let lastY = 0;
+
 function moveNoButton() {
   const yesRect = yesBtn.getBoundingClientRect();
   const noRect  = noBtn.getBoundingClientRect();
 
-  const minDistance = 120; // minimalna odległość od "Tak"
+  const minDistance = 140;
   let x, y, ok = false;
 
   while (!ok) {
-    x = (Math.random() * 300) - 150;
-    y = (Math.random() * 200) - 100;
+    x = (Math.random() * 320) - 160;
+    y = (Math.random() * 220) - 110;
 
     const futureX = noRect.left + x;
     const futureY = noRect.top + y;
@@ -141,18 +156,21 @@ function moveNoButton() {
     if (distance > minDistance) ok = true;
   }
 
+  lastX = x;
+  lastY = y;
+
   noBtn.style.transform = `translate(${x}px, ${y}px)`;
 }
 
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
-/* POZYCJA KARTY */
+/* ===== POZYCJA KARTY ===== */
 function getCardRect() {
   return card.getBoundingClientRect();
 }
 
-/* SERCA DOOKOŁA */
+/* ===== SERCA TYLKO DOOKOŁA ===== */
 function spawnHeart() {
   const rect = getCardRect();
   let x, y, ok = false;
@@ -178,9 +196,9 @@ function spawnHeart() {
   hearts.push(h);
 }
 
-/* KLIK TAK */
+/* ===== KLIK "TAK" ===== */
 yesBtn.addEventListener('click', () => {
-  title.innerHTML = '💖 YEEEEEY 💖<br>Dzięki Majciaaa😍';
+  title.innerHTML = '💖 YEEEEEY 💖<br>Dzięki Majciaaa 😍';
   buttons.style.display = 'none';
 
   for (let i = 0; i < 90; i++) spawnHeart();
@@ -192,7 +210,7 @@ yesBtn.addEventListener('click', () => {
   }, 3000);
 });
 
-/* SCREENSHOT + SHARE */
+/* ===== SCREENSHOT + SHARE ===== */
 shareBtn.addEventListener('click', async () => {
   const canvas = await html2canvas(document.body, {
     scale: window.devicePixelRatio
@@ -202,7 +220,10 @@ shareBtn.addEventListener('click', async () => {
     const file = new File([blob], 'walentynka.png', { type: 'image/png' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Walentynka 💖' });
+      await navigator.share({
+        files: [file],
+        title: 'Walentynka 💖'
+      });
     } else {
       const a = document.createElement('a');
       a.href = canvas.toDataURL();
