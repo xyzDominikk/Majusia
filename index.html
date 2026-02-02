@@ -19,6 +19,21 @@ body {
   align-items: center;
 }
 
+/* ===== NAPIS W TLE ===== */
+.footer-text {
+  position: fixed;
+  bottom: 18px;
+  width: 100%;
+  text-align: center;
+  font-size: 28px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.55);
+  letter-spacing: 1px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* ===== KARTA ===== */
 .card {
   background: white;
   padding: 30px;
@@ -59,6 +74,7 @@ button {
   color: #666;
 }
 
+/* ===== SERCA ===== */
 .heart {
   position: fixed;
   font-size: 26px;
@@ -82,6 +98,10 @@ button {
 
 <body>
 
+<!-- NAPIS W TLE -->
+<div class="footer-text">Dla Majusi🥰🥰</div>
+
+<!-- KARTA -->
 <div class="card" id="card">
   <h1>Czy zostaniesz moją walentynką? 💘</h1>
   <button id="yes">Tak 💖</button>
@@ -150,7 +170,7 @@ document.getElementById('yes').addEventListener('click', () => {
   setTimeout(() => {
     card.innerHTML = `
       <h1 style="color:#ff4d6d;">💖 YAAAAY 💖</h1>
-      <p style="font-size:22px;">Wiedziałem 😍</p>
+      <p style="font-size:22px;">Dzięki Majciaa 😍</p>
     `;
   }, 500);
 });
