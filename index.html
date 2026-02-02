@@ -21,7 +21,6 @@ body {
   align-items: center;
 }
 
-/* ===== TEKST W TLE ===== */
 .footer-text {
   position: fixed;
   bottom: 18px;
@@ -29,27 +28,32 @@ body {
   text-align: center;
   font-size: 28px;
   font-weight: bold;
-  color: rgba(255,255,255,0.6);
+  color: rgba(255,255,255,0.55);
   pointer-events: none;
 }
 
-/* ===== KARTA ===== */
 .card {
   background: white;
   padding: 30px;
   border-radius: 25px;
   text-align: center;
   box-shadow: 0 15px 40px rgba(0,0,0,0.25);
-  z-index: 2;
+  z-index: 5;
   max-width: 90vw;
 }
 
-h1 { margin-top: 0; }
+.card img {
+  width: 100%;
+  max-width: 220px;
+  border-radius: 18px;
+  margin: 20px auto 0;
+  display: none;
+}
 
-/* ===== PRZYCISKI ===== */
+
 .buttons {
   display: flex;
-  gap: 18px;
+  gap: 16px;
   justify-content: center;
   margin-top: 20px;
 }
@@ -62,42 +66,26 @@ button {
   cursor: pointer;
 }
 
-/* 🔙 STARE KOLORY */
-#yes {
-  background: #4CAF50; /* ZIELONY */
-  color: white;
-}
+#yes { background:#4CAF50; color:white; }
+#no  { background:#f44336; color:white; }
 
-#no {
-  background: #f44336; /* CZERWONY */
-  color: white;
-}
-
-/* ===== SHARE ===== */
 #share {
-  background: #4CAF50;
+  background: #ff4d6d;
   color: white;
   margin-top: 22px;
   display: none;
 }
 
-/* ===== SERCA ===== */
+/* SERCA */
 .heart {
   position: fixed;
-  font-size: 26px;
   pointer-events: none;
-  animation: float 3s ease-out forwards;
+  animation: float 3s linear forwards;
 }
 
 @keyframes float {
-  from {
-    transform: translateY(0) scale(1);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(-120vh) scale(0.8);
-    opacity: 1;
-  }
+  from { transform: translateY(0) scale(1); }
+  to   { transform: translateY(-120vh) scale(0.8); }
 }
 </style>
 </head>
@@ -114,6 +102,8 @@ button {
     <button id="no">Nie 💔</button>
   </div>
 
+  <img id="finalImage" src="image-removebg-preview.png" alt="🥰">
+
   <button id="share">Udostępnij 💌</button>
 </div>
 
@@ -123,59 +113,68 @@ const yesBtn = document.getElementById('yes');
 const shareBtn = document.getElementById('share');
 const buttons = document.getElementById('buttons');
 const title = document.getElementById('title');
+const image = document.getElementById('finalImage');
+const card = document.getElementById('card');
 
 let hearts = [];
 
-/* ===== UCIEKANIE "NIE" (BEZ ZMIANY POZYCJI TAK) ===== */
+/* UCIEKAJĄCY NIE */
 function moveNoButton() {
-  const rangeX = window.innerWidth * 0.5;
-  const rangeY = window.innerHeight * 0.4;
-
-  const x = (Math.random() * rangeX) - rangeX / 2;
-  const y = (Math.random() * rangeY) - rangeY / 2;
-
-  noBtn.style.transform = `translate(${x}px, ${y}px)`;
+  const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
+  const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+  noBtn.style.position = 'fixed';
+  noBtn.style.left = x + 'px';
+  noBtn.style.top = y + 'px';
 }
-
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
-/* ===== SERCA DOOKOŁA ===== */
+/* POZYCJA KARTY */
+function getCardRect() {
+  return card.getBoundingClientRect();
+}
+
+/* SERCA – TYLKO DOOKOŁA KARTY */
 function spawnHeart() {
+  const rect = getCardRect();
+  let x, y, ok = false;
+
+  while (!ok) {
+    x = Math.random() * window.innerWidth;
+    y = Math.random() * window.innerHeight;
+
+    const outsideX = x < rect.left - 20 || x > rect.right + 20;
+    const outsideY = y < rect.top - 20 || y > rect.bottom + 20;
+
+    ok = outsideX || outsideY;
+  }
+
   const h = document.createElement('div');
   h.className = 'heart';
   h.textContent = '💖';
-
-  const side = Math.floor(Math.random() * 4);
-  let x, y;
-
-  if (side === 0) { x = Math.random() * window.innerWidth; y = window.innerHeight + 40; }
-  if (side === 1) { x = Math.random() * window.innerWidth; y = -40; }
-  if (side === 2) { x = -40; y = Math.random() * window.innerHeight; }
-  if (side === 3) { x = window.innerWidth + 40; y = Math.random() * window.innerHeight; }
-
   h.style.left = x + 'px';
   h.style.top = y + 'px';
-  h.style.fontSize = (18 + Math.random() * 28) + 'px';
+  h.style.fontSize = (20 + Math.random() * 28) + 'px';
 
   document.body.appendChild(h);
   hearts.push(h);
 }
 
-/* ===== KLIK "TAK" ===== */
+/* KLIK TAK */
 yesBtn.addEventListener('click', () => {
-  title.innerHTML = '💖 YAAAAY 💖<br>Wiedziałem 😍';
+  title.innerHTML = '💖 YEEEEEY 💖<br>Dzięki Majciaaa 😍';
   buttons.style.display = 'none';
 
   for (let i = 0; i < 90; i++) spawnHeart();
 
   setTimeout(() => {
     hearts.forEach(h => h.style.animation = 'none');
+    image.style.display = 'block';
     shareBtn.style.display = 'inline-block';
   }, 3000);
 });
 
-/* ===== SCREENSHOT + SHARE ===== */
+/* SCREENSHOT + SHARE */
 shareBtn.addEventListener('click', async () => {
   const canvas = await html2canvas(document.body, {
     scale: window.devicePixelRatio
@@ -185,7 +184,10 @@ shareBtn.addEventListener('click', async () => {
     const file = new File([blob], 'walentynka.png', { type: 'image/png' });
 
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({ files: [file], title: 'Walentynka 💖' });
+      await navigator.share({
+        files: [file],
+        title: 'Walentynka 💖'
+      });
     } else {
       const a = document.createElement('a');
       a.href = canvas.toDataURL();
