@@ -115,7 +115,7 @@ noBtn.addEventListener('mouseover', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
 // SERDUSZKA
-setInterval(() => {
+function spawnHeart() {
   const heart = document.createElement('div');
   heart.className = 'heart';
   heart.textContent = '💖';
@@ -123,7 +123,9 @@ setInterval(() => {
   heart.style.bottom = '0';
   document.body.appendChild(heart);
   setTimeout(() => heart.remove(), 4000);
-}, 300);
+}
+
+setInterval(spawnHeart, 300);
 
 // CONFETTI
 function launchConfetti() {
@@ -137,27 +139,42 @@ function launchConfetti() {
   }
 }
 
-// SCREEN + SHARE
+// SCREEN + SHARE + WATERMARK
 document.getElementById('yes').addEventListener('click', async () => {
+  // Animacje
   launchConfetti();
+  for(let i=0;i<10;i++) spawnHeart();
 
-  const canvas = await html2canvas(document.body);
-  canvas.toBlob(blob => {
-    const file = new File([blob], 'walentynka.png', { type: 'image/png' });
+  // Odczekaj 1.5s żeby animacje się pokazały
+  setTimeout(async () => {
+    const canvas = await html2canvas(document.body);
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({
-        files: [file],
-        title: '💖 Odpowiedź 💖',
-        text: 'Powiedziała TAK 😍'
-      });
-    } else {
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL();
-      a.download = 'walentynka.png';
-      a.click();
-    }
-  });
+    // WATERMARK
+    const ctx = canvas.getContext('2d');
+    ctx.font = '50px Arial';
+    ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('POWIEDZIAŁA TAKK', canvas.width/2, canvas.height/2);
+
+    // Udostępnianie / pobieranie
+    canvas.toBlob(blob => {
+      const file = new File([blob], 'walentynka.png', { type: 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({
+          files: [file],
+          title: '💖 Odpowiedź 💖',
+          text: 'Powiedziała TAK 😍'
+        });
+      } else {
+        const a = document.createElement('a');
+        a.href = canvas.toDataURL();
+        a.download = 'walentynka.png';
+        a.click();
+      }
+    });
+  }, 1500);
 });
 </script>
 
