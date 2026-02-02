@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<title>Walentyka 💖</title>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #ffe6f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+}
+.card {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+button {
+  padding: 12px 20px;
+  margin: 10px;
+  font-size: 18px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.yes {
+  background: #4CAF50;
+  color: white;
+}
+.no {
+  background: #f44336;
+  color: white;
+}
+</style>
+</head>
+<body>
+
+<div class="card">
+  <img src="https://i.imgur.com/4M7IWwP.png" width="150"><br><br>
+  <h2>Czy zostaniesz moją walentynką? 💘</h2>
+  <button class="yes" onclick="yes()">Tak</button>
+  <button class="no" onclick="no()">Nie</button>
+</div>
+
+<script>
+function yes() {
+  document.body.innerHTML = "<h1>💖 YAY! 💖<br>Wiedziałem 😍</h1>";
+}
+function no() {
+  alert("Zastanów się jeszcze 😏");
+}
+</script>
+
+</body>
+</html>
