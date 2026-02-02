@@ -21,7 +21,7 @@ body {
   align-items: center;
 }
 
-/* ===== TEKST W TLE ===== */
+/* ===== TEKST NA DOLE ===== */
 .footer-text {
   position: fixed;
   bottom: 18px;
@@ -29,8 +29,9 @@ body {
   text-align: center;
   font-size: 28px;
   font-weight: bold;
-  color: rgba(255,255,255,0.55);
+  color: rgba(255,255,255,0.6);
   pointer-events: none;
+  transition: opacity .4s ease;
 }
 
 /* ===== KARTA ===== */
@@ -47,10 +48,11 @@ body {
 
 /* ===== ZDJĘCIE ===== */
 .card img {
+  display: block;
   width: 100%;
   max-width: 220px;
+  margin: 20px auto 0;
   border-radius: 18px;
-  margin-top: 20px;
   display: none;
 }
 
@@ -70,12 +72,16 @@ button {
   cursor: pointer;
 }
 
-#yes { background:#4CAF50; color:white; }
+#yes {
+  background: #ff4d6d;
+  color: white;
+}
 
 #no {
-  background:#f44336;
-  color:white;
-  transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  background: #f44336;
+  color: white;
+  will-change: transform;
+  transition: transform 0.55s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 #share {
@@ -90,16 +96,19 @@ button {
   position: fixed;
   pointer-events: none;
   font-size: 26px;
-  transition:
-    left 0.9s cubic-bezier(0.22, 1, 0.36, 1),
-    top  0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: float 3s linear forwards;
+}
+
+@keyframes float {
+  from { transform: translateY(0) scale(1); }
+  to   { transform: translateY(-120vh) scale(0.85); }
 }
 </style>
 </head>
 
 <body>
 
-<div class="footer-text">Dla Majusi 💖</div>
+<div class="footer-text" id="footer">Dla Majusi 💖</div>
 
 <div class="card" id="card">
   <h1 id="title">Czy zostaniesz moją walentynką? 💘</h1>
@@ -115,72 +124,71 @@ button {
 </div>
 
 <script>
-const yesBtn   = document.getElementById('yes');
-const noBtn    = document.getElementById('no');
+const noBtn = document.getElementById('no');
+const yesBtn = document.getElementById('yes');
 const shareBtn = document.getElementById('share');
-const buttons  = document.getElementById('buttons');
-const title    = document.getElementById('title');
-const image    = document.getElementById('finalImage');
-const card     = document.getElementById('card');
+const buttons = document.getElementById('buttons');
+const title = document.getElementById('title');
+const image = document.getElementById('finalImage');
+const card = document.getElementById('card');
+const footer = document.getElementById('footer');
 
 let hearts = [];
 
-/* ===== UCIEKANIE "NIE" – BEZ ZMIANY POZYCJI ===== */
+/* ===== UCIEKANIE "NIE" — BEZ RUSZANIA "TAK" ===== */
 function moveNoButton() {
-  const x = (Math.random() * 240) - 120;
-  const y = (Math.random() * 180) - 90;
+  const yesRect = yesBtn.getBoundingClientRect();
+  const noRect  = noBtn.getBoundingClientRect();
+
+  let x, y, ok = false;
+  const minDist = 130;
+
+  while (!ok) {
+    x = (Math.random() * 300) - 150;
+    y = (Math.random() * 200) - 100;
+
+    const dx = (noRect.left + x) - yesRect.left;
+    const dy = (noRect.top + y) - yesRect.top;
+
+    if (Math.sqrt(dx*dx + dy*dy) > minDist) ok = true;
+  }
+
   noBtn.style.transform = `translate(${x}px, ${y}px)`;
 }
 
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
-/* ===== LOSOWE SERCA (FAZA 1) ===== */
-function spawnHeart() {
+/* ===== SERCA DOOKOŁA KARTY ===== */
+function spawnHeartAroundCard(angle, radius) {
+  const rect = card.getBoundingClientRect();
+  const x = rect.left + rect.width/2 + Math.cos(angle) * radius;
+  const y = rect.top + rect.height/2 + Math.sin(angle) * radius;
+
   const h = document.createElement('div');
   h.className = 'heart';
   h.textContent = '💖';
-
-  h.style.left = Math.random() * window.innerWidth + 'px';
-  h.style.top  = Math.random() * window.innerHeight + 'px';
-  h.style.fontSize = (20 + Math.random() * 26) + 'px';
+  h.style.left = x + 'px';
+  h.style.top = y + 'px';
 
   document.body.appendChild(h);
   hearts.push(h);
 }
 
-/* ===== ROZRZUCENIE SERC DOOKOŁA KARTY (FAZA 2) ===== */
-function scatterHeartsAroundCard() {
-  const rect = card.getBoundingClientRect();
-  const margin = 30;
-
-  hearts.forEach(h => {
-    let x, y, ok = false;
-
-    while (!ok) {
-      x = Math.random() * window.innerWidth;
-      y = Math.random() * window.innerHeight;
-
-      const outsideX = x < rect.left - margin || x > rect.right + margin;
-      const outsideY = y < rect.top  - margin || y > rect.bottom + margin;
-
-      ok = outsideX || outsideY;
-    }
-
-    h.style.left = x + 'px';
-    h.style.top  = y + 'px';
-  });
-}
-
 /* ===== KLIK "TAK" ===== */
 yesBtn.addEventListener('click', () => {
-  title.innerHTML = '💖 YEEEEEY 💖<br>Dzięki Majciaaa 😍';
+  title.innerHTML = '💖 YAAAAY 💖<br>Dzięki Majciaa😍';
   buttons.style.display = 'none';
+  footer.style.opacity = '0';
 
-  for (let i = 0; i < 70; i++) spawnHeart();
+  const count = 36;
+  for (let i = 0; i < count; i++) {
+    const angle = (Math.PI * 2 / count) * i;
+    spawnHeartAroundCard(angle, 220);
+  }
 
   setTimeout(() => {
-    scatterHeartsAroundCard();
+    hearts.forEach(h => h.style.animation = 'none');
     image.style.display = 'block';
     shareBtn.style.display = 'inline-block';
   }, 3000);
@@ -209,4 +217,3 @@ shareBtn.addEventListener('click', async () => {
 
 </body>
 </html>
-
