@@ -12,7 +12,7 @@ body {
   margin: 0;
   height: 100vh;
   overflow: hidden;
-  font-family: 'Arial', sans-serif;
+  font-family: Arial, sans-serif;
   background: linear-gradient(135deg, #ff9a9e, #fad0c4);
   display: flex;
   justify-content: center;
@@ -29,17 +29,12 @@ body {
   z-index: 2;
 }
 
-h1 {
-  margin-bottom: 20px;
-}
-
 button {
   padding: 14px 26px;
   font-size: 20px;
   border: none;
   border-radius: 14px;
   cursor: pointer;
-  position: relative;
 }
 
 #yes {
@@ -53,6 +48,12 @@ button {
   position: absolute;
 }
 
+.counter {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #666;
+}
+
 .heart {
   position: fixed;
   color: #ff4d6d;
@@ -60,15 +61,21 @@ button {
   animation: floatUp 4s linear forwards;
 }
 
+.confetti {
+  position: fixed;
+  width: 10px;
+  height: 10px;
+  animation: fall 3s linear forwards;
+}
+
 @keyframes floatUp {
-  from {
-    transform: translateY(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateY(-100vh);
-    opacity: 0;
-  }
+  from { transform: translateY(0); opacity: 1; }
+  to { transform: translateY(-100vh); opacity: 0; }
+}
+
+@keyframes fall {
+  from { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+  to { transform: translateY(100vh) rotate(360deg); opacity: 0; }
 }
 </style>
 </head>
@@ -79,24 +86,29 @@ button {
   <h1>Czy zostaniesz moją walentynką? 💘</h1>
   <button id="yes">Tak 💖</button>
   <button id="no">Nie 💔</button>
+  <div class="counter">Próby kliknięcia „Nie”: <span id="count">0</span></div>
 </div>
 
 <audio id="sound">
-  <source src="https://www.soundjay.com/buttons/sounds/button-09.mp3" type="audio/mpeg">
+  <source src="https://www.soundjay.com/buttons/sounds/button-09.mp3">
 </audio>
 
 <script>
-// FULLSCREEN NA TELEFONIE
+// FULLSCREEN
 document.body.addEventListener('click', () => {
   if (document.documentElement.requestFullscreen) {
     document.documentElement.requestFullscreen().catch(()=>{});
   }
 }, { once: true });
 
-// UCIEKAJĄCY PRZYCISK "NIE"
+// UCIEKANIE + LICZNIK
 const noBtn = document.getElementById('no');
+let tries = 0;
 
 function moveNoButton() {
+  tries++;
+  document.getElementById('count').textContent = tries;
+
   const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
   const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
   noBtn.style.left = x + 'px';
@@ -119,12 +131,26 @@ function createHeart() {
 }
 setInterval(createHeart, 300);
 
-// KLIK "TAK"
+// CONFETTI
+function launchConfetti() {
+  for (let i = 0; i < 120; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.style.left = Math.random() * 100 + 'vw';
+    c.style.background = `hsl(${Math.random()*360},100%,50%)`;
+    c.style.animationDuration = (2 + Math.random() * 2) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 4000);
+  }
+}
+
+// TAK
 document.getElementById('yes').addEventListener('click', () => {
   document.getElementById('sound').play();
+  launchConfetti();
   document.body.innerHTML = `
     <h1 style="color:white;text-align:center;">
-      💖 YAAAAY 💖<br><br>
+      🎉💖 YAAAAY 💖🎉<br><br>
       Wiedziałem 😍
     </h1>`;
 });
