@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Walentynka 💖</title>
 
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
 <style>
 * { box-sizing: border-box; }
 
@@ -19,7 +21,6 @@ body {
   align-items: center;
 }
 
-/* ===== NAPIS W TLE ===== */
 .footer-text {
   position: fixed;
   bottom: 18px;
@@ -31,7 +32,6 @@ body {
   pointer-events: none;
 }
 
-/* ===== KARTA ===== */
 .card {
   background: white;
   padding: 30px;
@@ -63,7 +63,7 @@ button {
 #share {
   background: #ff4d6d;
   color: white;
-  margin-top: 20px;
+  margin-top: 22px;
   display: none;
 }
 
@@ -106,8 +106,9 @@ const title = document.getElementById('title');
 
 // ===== UCIEKAJĄCY "NIE" =====
 function moveNoButton() {
-  const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-  const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+  const margin = 12;
+  const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - margin);
+  const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - margin);
   noBtn.style.position = 'fixed';
   noBtn.style.left = x + 'px';
   noBtn.style.top = y + 'px';
@@ -121,7 +122,7 @@ function spawnHeart() {
   h.className = 'heart';
   h.textContent = '💖';
   h.style.left = Math.random() * window.innerWidth + 'px';
-  h.style.bottom = Math.random() * 30 + 'vh';
+  h.style.bottom = Math.random() * 40 + 'vh';
   h.style.fontSize = (18 + Math.random() * 30) + 'px';
   document.body.appendChild(h);
   setTimeout(() => h.remove(), 6000);
@@ -130,39 +131,44 @@ function spawnHeart() {
 // ===== KLIK "TAK" =====
 yesBtn.addEventListener('click', () => {
 
-  // zmiana tekstu
   title.innerHTML = '💖 YAAAAY 💖<br>Wiedziałem 😍';
-
-  // znikają przyciski Tak/Nie
   buttons.style.display = 'none';
 
-  // deszcz serc
   const rain = setInterval(() => {
     for (let i = 0; i < 6; i++) spawnHeart();
   }, 160);
 
   setTimeout(() => clearInterval(rain), 3500);
 
-  // pokazanie przycisku udostępniania
+  // pokaż share po animacji
   setTimeout(() => {
     shareBtn.style.display = 'inline-block';
-  }, 1200);
+  }, 2000);
 });
 
-// ===== UDOSTĘPNIANIE =====
+// ===== SCREEN + SHARE =====
 shareBtn.addEventListener('click', async () => {
-  if (!navigator.share) {
-    alert('Udostępnianie niedostępne na tym urządzeniu 😢');
-    return;
-  }
 
-  try {
-    await navigator.share({
-      title: 'Walentynka 💖',
-      text: 'Zostałam walentynką 😍💖',
-      url: window.location.href
-    });
-  } catch (e) {}
+  const canvas = await html2canvas(document.body, {
+    scale: window.devicePixelRatio
+  });
+
+  canvas.toBlob(async (blob) => {
+    const file = new File([blob], 'walentynka.png', { type: 'image/png' });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({
+        files: [file],
+        title: '💖 Walentynka 💖',
+        text: 'Powiedziała TAK 😍'
+      });
+    } else {
+      const a = document.createElement('a');
+      a.href = canvas.toDataURL();
+      a.download = 'walentynka.png';
+      a.click();
+    }
+  });
 });
 </script>
 
