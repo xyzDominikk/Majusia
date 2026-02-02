@@ -5,8 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Walentynka 💖</title>
 
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
 <style>
 * { box-sizing: border-box; }
 
@@ -30,19 +28,18 @@ body {
   font-size: 28px;
   font-weight: bold;
   color: rgba(255,255,255,0.55);
-  z-index: 1;
   pointer-events: none;
 }
 
 /* ===== KARTA ===== */
 .card {
   background: white;
-  padding: 30px 26px;
+  padding: 30px;
   border-radius: 25px;
   text-align: center;
   box-shadow: 0 15px 40px rgba(0,0,0,0.25);
   z-index: 2;
-  max-width: 320px;
+  max-width: 90vw;
 }
 
 .buttons {
@@ -63,6 +60,13 @@ button {
 #yes { background:#4CAF50; color:white; }
 #no  { background:#f44336; color:white; position:relative; }
 
+#share {
+  background: #ff4d6d;
+  color: white;
+  margin-top: 20px;
+  display: none;
+}
+
 /* ===== SERCA ===== */
 .heart {
   position: fixed;
@@ -75,14 +79,6 @@ button {
   from { transform: translateY(0); opacity:1; }
   to   { transform: translateY(-120vh); opacity:0; }
 }
-
-/* ===== SHARE BUTTON ===== */
-#shareBtn {
-  display: none;
-  margin-top: 18px;
-  background: #ff4d6d;
-  color: white;
-}
 </style>
 </head>
 
@@ -91,34 +87,33 @@ button {
 <div class="footer-text">Dla Majusi 💖</div>
 
 <div class="card" id="card">
-  <h1>Czy zostaniesz moją walentynką? 💘</h1>
+  <h1 id="title">Czy zostaniesz moją walentynką? 💘</h1>
 
-  <div class="buttons">
+  <div class="buttons" id="buttons">
     <button id="yes">Tak 💖</button>
     <button id="no">Nie 💔</button>
   </div>
 
-  <button id="shareBtn">Udostępnij 💖</button>
+  <button id="share">Udostępnij 💌</button>
 </div>
 
 <script>
 const noBtn = document.getElementById('no');
-const shareBtn = document.getElementById('shareBtn');
-let screenshotBlob = null;
+const yesBtn = document.getElementById('yes');
+const shareBtn = document.getElementById('share');
+const buttons = document.getElementById('buttons');
+const title = document.getElementById('title');
 
 // ===== UCIEKAJĄCY "NIE" =====
 function moveNoButton() {
-  const margin = 16;
-  const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - margin*2) + margin;
-  const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - margin*2) + margin;
-
+  const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
+  const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
   noBtn.style.position = 'fixed';
   noBtn.style.left = x + 'px';
   noBtn.style.top = y + 'px';
 }
-
 noBtn.addEventListener('mouseenter', moveNoButton);
-noBtn.addEventListener('touchstart', moveNoButton, { passive:true });
+noBtn.addEventListener('touchstart', moveNoButton);
 
 // ===== SERCA =====
 function spawnHeart() {
@@ -126,52 +121,48 @@ function spawnHeart() {
   h.className = 'heart';
   h.textContent = '💖';
   h.style.left = Math.random() * window.innerWidth + 'px';
-  h.style.bottom = Math.random() * 40 + 'vh';
+  h.style.bottom = Math.random() * 30 + 'vh';
   h.style.fontSize = (18 + Math.random() * 30) + 'px';
   document.body.appendChild(h);
   setTimeout(() => h.remove(), 6000);
 }
 
-// ===== SCREENSHOT =====
-async function makeScreenshot() {
-  const canvas = await html2canvas(document.body);
-  return new Promise(resolve => {
-    canvas.toBlob(blob => resolve(blob), 'image/png');
-  });
-}
-
 // ===== KLIK "TAK" =====
-document.getElementById('yes').addEventListener('click', async () => {
+yesBtn.addEventListener('click', () => {
 
+  // zmiana tekstu
+  title.innerHTML = '💖 YAAAAY 💖<br>Wiedziałem 😍';
+
+  // znikają przyciski Tak/Nie
+  buttons.style.display = 'none';
+
+  // deszcz serc
   const rain = setInterval(() => {
     for (let i = 0; i < 6; i++) spawnHeart();
   }, 160);
 
-  setTimeout(() => clearInterval(rain), 4000);
+  setTimeout(() => clearInterval(rain), 3500);
 
-  // ⏱️ robimy screena PO animacji
-  setTimeout(async () => {
-    screenshotBlob = await makeScreenshot();
+  // pokazanie przycisku udostępniania
+  setTimeout(() => {
     shareBtn.style.display = 'inline-block';
-  }, 4800);
+  }, 1200);
 });
 
-// ===== SHARE (USER ACTION) =====
+// ===== UDOSTĘPNIANIE =====
 shareBtn.addEventListener('click', async () => {
-  const file = new File([screenshotBlob], 'walentynka.png', { type: 'image/png' });
-
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    await navigator.share({
-      files: [file],
-      title: '💖 Walentynka 💖',
-      text: 'Powiedziała TAK 😍'
-    });
-  } else {
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(screenshotBlob);
-    a.download = 'walentynka.png';
-    a.click();
+  if (!navigator.share) {
+    alert('Udostępnianie niedostępne na tym urządzeniu 😢');
+    return;
   }
+
+  try {
+    await navigator.share({
+      title: 'Walentynka 💖',
+      text: 'Zostałam walentynką 😍💖',
+      url: window.location.href
+    });
+  } catch (e) {}
 });
 </script>
 
