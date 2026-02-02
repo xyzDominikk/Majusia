@@ -42,6 +42,15 @@ body {
   max-width: 90vw;
 }
 
+/* ===== ZDJĘCIE ===== */
+.card img {
+  width: 100%;
+  max-width: 220px;
+  border-radius: 18px;
+  margin-bottom: 18px;
+  object-fit: cover;
+}
+
 .buttons {
   display: flex;
   gap: 16px;
@@ -87,6 +96,10 @@ button {
 <div class="footer-text">Dla Majusi 💖</div>
 
 <div class="card" id="card">
+
+  <!-- 👇 ZDJĘCIE NAD NAPISEM -->
+  <img src="piesek.jpg" alt="Słodki piesek 💖">
+
   <h1 id="title">Czy zostaniesz moją walentynką? 💘</h1>
 
   <div class="buttons" id="buttons">
@@ -106,12 +119,10 @@ const title = document.getElementById('title');
 
 let hearts = [];
 
-/* ===== UCIEKAJĄCY "NIE" ===== */
+/* UCIEKAJĄCY "NIE" */
 function moveNoButton() {
-  const margin = 12;
-  const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - margin);
-  const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - margin);
-
+  const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
+  const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
   noBtn.style.position = 'fixed';
   noBtn.style.left = x + 'px';
   noBtn.style.top = y + 'px';
@@ -119,55 +130,38 @@ function moveNoButton() {
 noBtn.addEventListener('mouseenter', moveNoButton);
 noBtn.addEventListener('touchstart', moveNoButton);
 
-/* ===== SERCA ===== */
+/* SERCA */
 function spawnHeart() {
   const h = document.createElement('div');
   h.className = 'heart';
   h.textContent = '💖';
-
   h.style.left = Math.random() * window.innerWidth + 'px';
   h.style.top = Math.random() * window.innerHeight + 'px';
   h.style.fontSize = (18 + Math.random() * 30) + 'px';
-
   document.body.appendChild(h);
   hearts.push(h);
 }
 
-/* ===== KLIK "TAK" ===== */
+/* KLIK "TAK" */
 yesBtn.addEventListener('click', () => {
-
   title.innerHTML = '💖 YAAAAY 💖<br>Wiedziałem 😍';
   buttons.style.display = 'none';
 
   for (let i = 0; i < 80; i++) spawnHeart();
 
-  // ⏱️ po 3s stop animacji
   setTimeout(() => {
-    hearts.forEach(h => {
-      h.style.animation = 'none';
-      h.style.opacity = '1';
-    });
-
+    hearts.forEach(h => h.style.animation = 'none');
     shareBtn.style.display = 'inline-block';
   }, 3000);
 });
 
-/* ===== SCREEN + SHARE ===== */
+/* SCREEN + SHARE */
 shareBtn.addEventListener('click', async () => {
-
-  const canvas = await html2canvas(document.body, {
-    scale: window.devicePixelRatio
-  });
-
+  const canvas = await html2canvas(document.body, { scale: window.devicePixelRatio });
   canvas.toBlob(async blob => {
     const file = new File([blob], 'walentynka.png', { type: 'image/png' });
-
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      await navigator.share({
-        files: [file],
-        title: '💖 Walentynka 💖',
-        text: 'Powiedziała TAK 😍'
-      });
+      await navigator.share({ files: [file], title: 'Walentynka 💖' });
     } else {
       const a = document.createElement('a');
       a.href = canvas.toDataURL();
